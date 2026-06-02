@@ -1,9 +1,24 @@
 const OpenAI = require("openai")
+const { zodTextFormat } = require("openai/helpers/zod")
 const { z } = require("zod")
-const { zodToJsonSchema } = require("zod-to-json-schema")
 const puppeteer = require("puppeteer")
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+let client = null
+
+function getOpenAIClient() {
+    if (client) {
+        return client
+    }
+
+    const apiKey = process.env.OPENAI_API_KEY
+
+    if (!apiKey) {
+        throw new Error("OPENAI_API_KEY is missing. Add it to Backend/.env before using AI features.")
+    }
+
+    client = new OpenAI({ apiKey })
+    return client
+}
 
 
 const interviewReportSchema = z.object({
@@ -30,26 +45,27 @@ const interviewReportSchema = z.object({
     title: z.string().describe("The title of the job for which the interview report is generated"),
 })
 
-async function callModelForJson({ prompt, schema }) {
-    const schemaObj = typeof schema === 'string' ? JSON.parse(schema) : schema
-
-    const systemInstruction = `You are a helpful assistant. Return only a single valid JSON object that exactly matches the provided JSON schema. Do not add any extra text.`
-    const schemaBlock = `JSON-SCHEMA:${JSON.stringify(schemaObj)}`
-
-    const fullPrompt = `${systemInstruction}\n${schemaBlock}\n\n${prompt}`
-
+async function callModelForJson({ prompt, schema, schemaName }) {
     const model = process.env.OPENAI_MODEL || "gpt-4o-mini"
+    const openai = getOpenAIClient()
 
-    const response = await client.responses.create({
+    const response = await openai.responses.create({
         model,
-        input: fullPrompt,
-        temperature: 0.0
+        input: prompt,
+        temperature: 0.0,
+        text: {
+            format: zodTextFormat(schema, schemaName)
+        }
     })
 
-    const text = response.output_text || (response.output && response.output.map(o => (o.content || []).map(c => c.text || '').join('')).join('\n')) || ''
+    if (response.output_parsed) {
+        return response.output_parsed
+    }
+
+    const text = response.output_text || ''
 
     try {
-        return JSON.parse(text)
+        return schema.parse(JSON.parse(text))
     } catch (err) {
         const errObj = new Error('Model output is not valid JSON')
         errObj.raw = text
@@ -61,9 +77,7 @@ async function generateInterviewReport({ resume, selfDescription, jobDescription
 
     const prompt = `Generate an interview report for a candidate with the following details:\nResume: ${resume}\nSelf Description: ${selfDescription}\nJob Description: ${jobDescription}`
 
-    const schema = zodToJsonSchema(interviewReportSchema)
-
-    return await callModelForJson({ prompt, schema })
+    return await callModelForJson({ prompt, schema: interviewReportSchema, schemaName: "interview_report" })
 }
 
 async function generatePdfFromHtml(htmlContent) {
@@ -93,9 +107,7 @@ async function generateResumePdf({ resume, selfDescription, jobDescription }) {
 
     const prompt = `Generate resume for a candidate with the following details:\nResume: ${resume}\nSelf Description: ${selfDescription}\nJob Description: ${jobDescription}\n\nReturn a JSON object with a single field \"html\" containing the HTML string.`
 
-    const schema = zodToJsonSchema(resumePdfSchema)
-
-    const jsonContent = await callModelForJson({ prompt, schema })
+    const jsonContent = await callModelForJson({ prompt, schema: resumePdfSchema, schemaName: "resume_pdf" })
 
     const pdfBuffer = await generatePdfFromHtml(jsonContent.html)
 
