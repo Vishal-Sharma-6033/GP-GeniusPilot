@@ -1,0 +1,10 @@
+{
+  "name": "gp-geniuspilot-root",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "npm --prefix Backend run dev & npm --prefix Frontend run dev & wait",
+    "dev:backend": "npm --prefix Backend run dev",
+    "dev:frontend": "npm --prefix Frontend run dev"
+  }
+}
