@@ -32,3 +32,6 @@ lerna-debug.log*
 # Editor settings
 .vscode/
 .idea/
+
+# Project Analysis
+PROJECT_ANALYSIS.md
