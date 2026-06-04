@@ -1,6 +1,6 @@
 const OpenAI = require("openai")
-const { zodTextFormat } = require("openai/helpers/zod")
 const { z } = require("zod")
+const { zodToJsonSchema } = require("zod-to-json-schema")
 const puppeteer = require("puppeteer")
 
 let client = null
@@ -11,12 +11,16 @@ function getOpenAIClient() {
     }
 
     const apiKey = process.env.OPENAI_API_KEY
+    const baseURL = process.env.OPENAI_BASE_URL
 
     if (!apiKey) {
         throw new Error("OPENAI_API_KEY is missing. Add it to Backend/.env before using AI features.")
     }
 
-    client = new OpenAI({ apiKey })
+    client = new OpenAI({
+        apiKey,
+        baseURL: baseURL || undefined
+    })
     return client
 }
 
@@ -46,23 +50,26 @@ const interviewReportSchema = z.object({
 })
 
 async function callModelForJson({ prompt, schema, schemaName }) {
-    const model = process.env.OPENAI_MODEL || "gpt-4o-mini"
+    const model = process.env.OPENAI_MODEL || "auto"
     const openai = getOpenAIClient()
 
-    const response = await openai.responses.create({
+    const jsonSchema = zodToJsonSchema(schema, schemaName)
+    const systemPrompt = `You are a helpful assistant. You must output ONLY a valid JSON object matching this JSON Schema (do not include any conversational text, markdown code blocks, or explanations):
+${JSON.stringify(jsonSchema, null, 2)}`
+
+    const response = await openai.chat.completions.create({
         model,
-        input: prompt,
-        temperature: 0.0,
-        text: {
-            format: zodTextFormat(schema, schemaName)
-        }
+        messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: prompt }
+        ],
+        temperature: 0.0
     })
 
-    if (response.output_parsed) {
-        return response.output_parsed
-    }
-
-    const text = response.output_text || ''
+    let text = response.choices[0].message.content || ''
+    
+    // Clean markdown code blocks if the model wrapped the JSON
+    text = text.replace(/^```json\s*/i, '').replace(/```$/, '').trim()
 
     try {
         return schema.parse(JSON.parse(text))
