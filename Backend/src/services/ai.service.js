@@ -31,12 +31,12 @@ const interviewReportSchema = z.object({
         question: z.string().describe("The technical question can be asked in the interview"),
         intention: z.string().describe("The intention of interviewer behind asking this question"),
         answer: z.string().describe("How to answer this question, what points to cover, what approach to take etc.")
-    })).describe("Technical questions that can be asked in the interview along with their intention and how to answer them"),
+    })).min(10).describe("Technical questions that can be asked in the interview along with their intention and how to answer them. You must generate at least 10 questions."),
     behavioralQuestions: z.array(z.object({
         question: z.string().describe("The technical question can be asked in the interview"),
         intention: z.string().describe("The intention of interviewer behind asking this question"),
         answer: z.string().describe("How to answer this question, what points to cover, what approach to take etc.")
-    })).describe("Behavioral questions that can be asked in the interview along with their intention and how to answer them"),
+    })).min(10).describe("Behavioral questions that can be asked in the interview along with their intention and how to answer them. You must generate at least 10 questions."),
     skillGaps: z.array(z.object({
         skill: z.string().describe("The skill which the candidate is lacking"),
         severity: z.enum([ "low", "medium", "high" ]).describe("The severity of this skill gap, i.e. how important is this skill for the job and how much it can impact the candidate's chances")
@@ -45,7 +45,7 @@ const interviewReportSchema = z.object({
         day: z.number().describe("The day number in the preparation plan, starting from 1"),
         focus: z.string().describe("The main focus of this day in the preparation plan, e.g. data structures, system design, mock interviews etc."),
         tasks: z.array(z.string()).describe("List of tasks to be done on this day to follow the preparation plan, e.g. read a specific book or article, solve a set of problems, watch a video etc.")
-    })).describe("A day-wise preparation plan for the candidate to follow in order to prepare for the interview effectively"),
+    })).min(15).describe("A day-wise preparation plan for the candidate to follow in order to prepare for the interview effectively. You must generate at least 15 days."),
     title: z.string().describe("The title of the job for which the interview report is generated"),
 })
 
@@ -87,7 +87,15 @@ ${JSON.stringify(jsonSchema, null, 2)}`
 
 async function generateInterviewReport({ resume, selfDescription, jobDescription }) {
 
-    const prompt = `Generate an interview report for a candidate with the following details:\nResume: ${resume}\nSelf Description: ${selfDescription}\nJob Description: ${jobDescription}`
+    const prompt = `Generate an interview report for a candidate with the following details:
+Resume: ${resume}
+Self Description: ${selfDescription}
+Job Description: ${jobDescription}
+
+Strict Requirements:
+1. You MUST generate at least 10 unique, relevant technical questions tailored to the candidate's gaps and the job description.
+2. You MUST generate at least 10 unique, relevant behavioral questions.
+3. You MUST generate a comprehensive preparation roadmap with a minimum of 15 days (Day 1 to Day 15 or more). Do not skip days.`
 
     return await callModelForJson({ prompt, schema: interviewReportSchema, schemaName: "interview_report" })
 }
