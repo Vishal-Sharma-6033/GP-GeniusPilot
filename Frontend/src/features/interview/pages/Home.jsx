@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react'
 import "../style/home.scss"
 import { useInterview } from '../hooks/useInterview.js'
 import { useNavigate } from 'react-router'
+import Navbar from '../../auth/components/Navbar'
 
 const Home = () => {
 
@@ -35,13 +36,15 @@ const Home = () => {
     }
 
     return (
-        <div className='home-page'>
+        <div className="home-page-wrapper" style={{ width: '100%', minHeight: '100vh', backgroundColor: '#0d1117', display: 'flex', flexDirection: 'column' }}>
+            <Navbar />
+            <div className='home-page'>
 
-            {/* Page Header */}
-            <header className='page-header'>
-                <h1>Create Your Custom <span className='highlight'>Interview Plan</span></h1>
-                <p>Let our AI analyze the job requirements and your unique profile to build a winning strategy.</p>
-            </header>
+                {/* Page Header */}
+                <header className='page-header'>
+                    <h1>Create Your Custom <span className='highlight'>Interview Plan</span></h1>
+                    <p>Let our AI analyze the job requirements and your unique profile to build a winning strategy.</p>
+                </header>
 
             {/* Main Card */}
             <div className='interview-card'>
@@ -177,6 +180,7 @@ const Home = () => {
                 <a href='#'>Terms of Service</a>
                 <a href='#'>Help Center</a>
             </footer>
+            </div>
         </div>
     )
 }
