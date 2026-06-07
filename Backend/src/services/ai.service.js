@@ -69,13 +69,18 @@ ${JSON.stringify(jsonSchema, null, 2)}`
     let text = response.choices[0].message.content || ''
     
     // Clean markdown code blocks if the model wrapped the JSON
-    text = text.replace(/^```json\s*/i, '').replace(/```$/, '').trim()
+    text = text.trim()
+    const firstBrace = text.indexOf('{')
+    const lastBrace = text.lastIndexOf('}')
+    if (firstBrace !== -1 && lastBrace !== -1) {
+        text = text.slice(firstBrace, lastBrace + 1)
+    }
 
     try {
         return schema.parse(JSON.parse(text))
     } catch (err) {
         const errObj = new Error('Model output is not valid JSON')
-        errObj.raw = text
+        errObj.raw = response.choices[0].message.content || ''
         throw errObj
     }
 }
