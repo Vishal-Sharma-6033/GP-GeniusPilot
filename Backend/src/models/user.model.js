@@ -22,6 +22,11 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true
+    },
+    credits: {
+        type: Number,
+        default: 10,
+        min: 0
     }
 }, {
     timestamps: true
