@@ -82,6 +82,14 @@ const interviewReportSchema = new mongoose.Schema({
     },
     technicalQuestions: [ technicalQuestionSchema ],
     behavioralQuestions: [ behavioralQuestionSchema ],
+    technicalProgress: [ {
+        type: Boolean,
+        default: false
+    } ],
+    behavioralProgress: [ {
+        type: Boolean,
+        default: false
+    } ],
     skillGaps: [ skillGapSchema ],
     preparationPlan: [ preparationPlanSchema ],
     user: {

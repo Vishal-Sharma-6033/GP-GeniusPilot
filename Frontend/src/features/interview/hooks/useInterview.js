@@ -1,4 +1,4 @@
-import { getAllInterviewReports, generateInterviewReport, getInterviewReportById, generateResumePdf, deleteInterviewReport } from "../services/interview.api"
+import { getAllInterviewReports, generateInterviewReport, getInterviewReportById, generateResumePdf, deleteInterviewReport, updateProgress } from "../services/interview.api"
 import { useContext, useEffect } from "react"
 import { InterviewContext } from "../interview.context"
 import { AuthContext } from "../../auth/auth.context"
@@ -95,6 +95,19 @@ export const useInterview = () => {
         }
     }
 
+    const updateStudyProgress = async ({ type, progress }) => {
+        if (!report) return
+        try {
+            await updateProgress({ interviewId: report._id, type, progress })
+            setReport((prev) => ({
+                ...prev,
+                [type === 'technical' ? 'technicalProgress' : 'behavioralProgress']: progress
+            }))
+        } catch (error) {
+            console.error("Error updating progress:", error)
+        }
+    }
+
     useEffect(() => {
         if (interviewId) {
             getReportById(interviewId)
@@ -103,6 +116,6 @@ export const useInterview = () => {
         }
     }, [ interviewId ])
 
-    return { loading, report, reports, generateReport, getReportById, getReports, getResumePdf, deleteReport }
+    return { loading, report, reports, generateReport, getReportById, getReports, getResumePdf, deleteReport, updateStudyProgress }
 
 }

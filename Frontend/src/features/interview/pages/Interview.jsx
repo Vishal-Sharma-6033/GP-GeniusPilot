@@ -13,16 +13,29 @@ const NAV_ITEMS = [
 ]
 
 // ── Sub-components ────────────────────────────────────────────────────────────
-const QuestionCard = ({ item, index }) => {
+const QuestionCard = ({ item, index, reviewed, onToggle }) => {
     const [ open, setOpen ] = useState(false)
     return (
-        <div className='q-card'>
-            <div className='q-card__header' onClick={() => setOpen(o => !o)}>
-                <span className='q-card__index'>Q{index + 1}</span>
-                <p className='q-card__question'>{item.question}</p>
-                <span className={`q-card__chevron ${open ? 'q-card__chevron--open' : ''}`}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
-                </span>
+        <div className={`q-card ${reviewed ? 'q-card--reviewed' : ''}`}>
+            <div className='q-card__header'>
+                <button
+                    className={`q-card__check ${reviewed ? 'q-card__check--done' : ''}`}
+                    onClick={(e) => { e.stopPropagation(); onToggle(index) }}
+                    title={reviewed ? 'Mark as not reviewed' : 'Mark as reviewed'}
+                >
+                    {reviewed ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                    ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+                    )}
+                </button>
+                <div className='q-card__header-text' onClick={() => setOpen(o => !o)}>
+                    <span className='q-card__index'>Q{index + 1}</span>
+                    <p className='q-card__question'>{item.question}</p>
+                    <span className={`q-card__chevron ${open ? 'q-card__chevron--open' : ''}`}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+                    </span>
+                </div>
             </div>
             {open && (
                 <div className='q-card__body'>
@@ -57,17 +70,49 @@ const RoadMapDay = ({ day }) => (
     </div>
 )
 
+function ProgressBar({ progress, total }) {
+    const pct = total > 0 ? Math.round((progress / total) * 100) : 0
+    return (
+        <div className='progress-bar-wrap'>
+            <div className='progress-bar'>
+                <div className='progress-bar__fill' style={{ width: `${pct}%` }} />
+            </div>
+            <span className='progress-bar__label'>{progress}/{total} reviewed</span>
+        </div>
+    )
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 const Interview = () => {
     const [ activeNav, setActiveNav ] = useState('technical')
-    const { report, getReportById, loading, getResumePdf } = useInterview()
+    const { report, getReportById, loading, getResumePdf, updateStudyProgress } = useInterview()
     const { interviewId } = useParams()
+    const [ techProgress, setTechProgress ] = useState([])
+    const [ behProgress, setBehProgress ] = useState([])
 
     useEffect(() => {
         if (interviewId) {
             getReportById(interviewId)
         }
     }, [ interviewId ])
+
+    useEffect(() => {
+        if (report) {
+            setTechProgress(report.technicalProgress || Array(report.technicalQuestions.length).fill(false))
+            setBehProgress(report.behavioralProgress || Array(report.behavioralQuestions.length).fill(false))
+        }
+    }, [ report ])
+
+    const handleToggle = (type) => (index) => {
+        const isTech = type === 'technical'
+        const setter = isTech ? setTechProgress : setBehProgress
+        setter(prev => {
+            const next = [ ...prev ]
+            next[index] = !next[index]
+            updateStudyProgress({ type, progress: next })
+            return next
+        })
+    }
 
 
 
@@ -123,9 +168,10 @@ const Interview = () => {
                                 <h2>Technical Questions</h2>
                                 <span className='content-header__count'>{report.technicalQuestions.length} questions</span>
                             </div>
+                            <ProgressBar progress={techProgress.filter(Boolean).length} total={techProgress.length} />
                             <div className='q-list'>
                                 {report.technicalQuestions.map((q, i) => (
-                                    <QuestionCard key={i} item={q} index={i} />
+                                    <QuestionCard key={i} item={q} index={i} reviewed={techProgress[i]} onToggle={handleToggle('technical')} />
                                 ))}
                             </div>
                         </section>
@@ -137,9 +183,10 @@ const Interview = () => {
                                 <h2>Behavioral Questions</h2>
                                 <span className='content-header__count'>{report.behavioralQuestions.length} questions</span>
                             </div>
+                            <ProgressBar progress={behProgress.filter(Boolean).length} total={behProgress.length} />
                             <div className='q-list'>
                                 {report.behavioralQuestions.map((q, i) => (
-                                    <QuestionCard key={i} item={q} index={i} />
+                                    <QuestionCard key={i} item={q} index={i} reviewed={behProgress[i]} onToggle={handleToggle('behavioral')} />
                                 ))}
                             </div>
                         </section>

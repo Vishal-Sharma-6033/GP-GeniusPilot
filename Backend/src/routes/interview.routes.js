@@ -23,6 +23,13 @@ interviewRouter.get("/report/:interviewId", authMiddleware.authUser, interviewCo
 
 
 /**
+ * @route PUT /api/interview/report/:interviewId/progress
+ * @description update study progress for a report.
+ * @access private
+ */
+interviewRouter.put("/report/:interviewId/progress", authMiddleware.authUser, interviewController.updateProgressController)
+
+/**
  * @route GET /api/interview/
  * @description get all interview reports of logged in user.
  * @access private

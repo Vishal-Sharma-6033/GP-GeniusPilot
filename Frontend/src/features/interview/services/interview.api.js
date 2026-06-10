@@ -65,3 +65,11 @@ export const deleteInterviewReport = async (interviewId) => {
     const response = await api.delete(`/api/interview/${interviewId}`)
     return response.data
 }
+
+/**
+ * @description Service to update study progress for a report.
+ */
+export const updateProgress = async ({ interviewId, type, progress }) => {
+    const response = await api.put(`/api/interview/report/${interviewId}/progress`, { type, progress })
+    return response.data
+}

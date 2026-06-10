@@ -57,12 +57,17 @@ async function generateInterViewReportController(req, res) {
             jobDescription
         })
 
+        const techCount = (interViewReportByAi.technicalQuestions || []).length
+        const behCount = (interViewReportByAi.behavioralQuestions || []).length
+
         const interviewReport = await interviewReportModel.create({
             user: req.user.id,
             resume: resumeText,
             selfDescription,
             jobDescription,
-            ...interViewReportByAi
+            ...interViewReportByAi,
+            technicalProgress: Array(techCount).fill(false),
+            behavioralProgress: Array(behCount).fill(false)
         })
 
         user.credits -= 1
@@ -173,10 +178,52 @@ async function deleteInterviewReportController(req, res) {
     }
 }
 
+/**
+ * @description Controller to update study progress (reviewed questions).
+ */
+async function updateProgressController(req, res) {
+    try {
+        const { interviewId } = req.params
+        const { type, progress } = req.body
+
+        if (!type || !progress || !Array.isArray(progress)) {
+            return res.status(400).json({
+                message: "Please provide 'type' ('technical' or 'behavioral') and 'progress' array."
+            })
+        }
+
+        const field = type === 'technical' ? 'technicalProgress' : 'behavioralProgress'
+
+        const interviewReport = await interviewReportModel.findOneAndUpdate(
+            { _id: interviewId, user: req.user.id },
+            { [field]: progress },
+            { new: true }
+        )
+
+        if (!interviewReport) {
+            return res.status(404).json({
+                message: "Interview report not found."
+            })
+        }
+
+        res.status(200).json({
+            message: "Progress updated successfully.",
+            [field]: progress
+        })
+    } catch (error) {
+        console.error("Error in updateProgressController:", error)
+        res.status(500).json({
+            message: "Failed to update progress.",
+            error: error.message
+        })
+    }
+}
+
 module.exports = {
     generateInterViewReportController,
     getInterviewReportByIdController,
     getAllInterviewReportsController,
     generateResumePdfController,
-    deleteInterviewReportController
+    deleteInterviewReportController,
+    updateProgressController
 }
