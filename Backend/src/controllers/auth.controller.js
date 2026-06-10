@@ -54,7 +54,8 @@ async function registerUserController(req, res) {
             user: {
                 id: user._id,
                 username: user.username,
-                email: user.email
+                email: user.email,
+                credits: user.credits
             }
         })
     } catch (err) {
@@ -115,7 +116,8 @@ async function loginUserController(req, res) {
         user: {
             id: user._id,
             username: user.username,
-            email: user.email
+            email: user.email,
+            credits: user.credits
         }
     })
 }
@@ -162,7 +164,8 @@ async function getMeController(req, res) {
         user: {
             id: user._id,
             username: user.username,
-            email: user.email
+            email: user.email,
+            credits: user.credits
         }
     })
 
