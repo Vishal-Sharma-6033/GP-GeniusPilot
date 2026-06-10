@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import './Navbar.scss'
 
 const Navbar = () => {
-    const { user, handleLogout } = useAuth()
+    const { user, credits, handleLogout } = useAuth()
     const navigate = useNavigate()
 
     const onLogout = async () => {
@@ -26,6 +26,10 @@ const Navbar = () => {
 
                 {user && (
                     <div className="navbar-user">
+                        <div className="credits-badge">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                            <span>{credits}</span>
+                        </div>
                         <div className="user-info">
                             <span className="user-avatar">{user.username.charAt(0).toUpperCase()}</span>
                             <span className="user-name">{user.username}</span>
