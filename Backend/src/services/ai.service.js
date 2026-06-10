@@ -49,6 +49,41 @@ const interviewReportSchema = z.object({
     title: z.string().describe("The title of the job for which the interview report is generated"),
 })
 
+function extractJson(text) {
+    text = text.trim()
+
+    // Remove markdown code fences (```json ... ``` or ``` ... ```)
+    text = text.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim()
+
+    // Some models prefix with the schema name — find the outermost JSON object
+    const firstBrace = text.indexOf('{')
+    const lastBrace = text.lastIndexOf('}')
+    if (firstBrace !== -1 && lastBrace !== -1) {
+        text = text.slice(firstBrace, lastBrace + 1)
+    }
+
+    return text
+}
+
+function repairJson(text) {
+    // Remove trailing commas before closing braces/brackets
+    text = text.replace(/,(\s*[}\]])/g, '$1')
+
+    // Remove comments (// and /* */)
+    text = text.replace(/\/\/.*$/gm, '')
+    text = text.replace(/\/\*[\s\S]*?\*\//g, '')
+
+    // Replace single quotes with double quotes (only within values, not already double-quoted)
+    // This is a simple approach — replace single quotes used for keys/values
+    text = text.replace(/(?<=:\s*)'([^']*)'(?=\s*[,}\]])/g, '"$1"')
+    text = text.replace(/(?<=[{,]\s*)'([^']*)'(?=\s*:)/g, '"$1"')
+
+    // Unescape unescaped quotes inside strings (simple fix)
+    text = text.replace(/(?<=:"[^"]*?)"(?=[^"]*?")/g, '\\"')
+
+    return text
+}
+
 async function callModelForJson({ prompt, schema, schemaName }) {
     const model = process.env.OPENAI_MODEL || "auto"
     const openai = getOpenAIClient()
@@ -66,21 +101,38 @@ ${JSON.stringify(jsonSchema, null, 2)}`
         temperature: 0.0
     })
 
-    let text = response.choices[0].message.content || ''
-    
-    // Clean markdown code blocks if the model wrapped the JSON
-    text = text.trim()
-    const firstBrace = text.indexOf('{')
-    const lastBrace = text.lastIndexOf('}')
-    if (firstBrace !== -1 && lastBrace !== -1) {
-        text = text.slice(firstBrace, lastBrace + 1)
+    let rawText = response.choices[0].message.content || ''
+    let text = extractJson(rawText)
+
+    // Attempt to parse with progressively more aggressive repair
+    let parsed = null
+    let lastError = null
+
+    for (const attempt of [
+        (t) => JSON.parse(t),
+        (t) => JSON.parse(repairJson(t)),
+    ]) {
+        try {
+            parsed = attempt(text)
+            break
+        } catch (err) {
+            lastError = err
+        }
+    }
+
+    if (!parsed) {
+        const errObj = new Error('Model output is not valid JSON')
+        errObj.raw = rawText
+        errObj.parseError = lastError ? lastError.message : 'Unknown'
+        throw errObj
     }
 
     try {
-        return schema.parse(JSON.parse(text))
+        return schema.parse(parsed)
     } catch (err) {
-        const errObj = new Error('Model output is not valid JSON')
-        errObj.raw = response.choices[0].message.content || ''
+        const errObj = new Error('Model output does not match expected schema')
+        errObj.raw = rawText
+        errObj.parseError = err.message
         throw errObj
     }
 }
