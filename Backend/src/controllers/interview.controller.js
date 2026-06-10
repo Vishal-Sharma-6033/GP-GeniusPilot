@@ -1,6 +1,7 @@
 const { PDFParse } = require("pdf-parse")
 const { generateInterviewReport, generateResumePdf } = require("../services/ai.service")
 const interviewReportModel = require("../models/interviewReport.model")
+const userModel = require("../models/user.model")
 
 
 
@@ -43,6 +44,13 @@ async function generateInterViewReportController(req, res) {
             })
         }
 
+        const user = await userModel.findById(req.user.id)
+        if (!user || user.credits <= 0) {
+            return res.status(403).json({
+                message: "You have no free credits remaining. Each generation uses 1 credit."
+            })
+        }
+
         const interViewReportByAi = await generateInterviewReport({
             resume: resumeText,
             selfDescription,
@@ -57,9 +65,13 @@ async function generateInterViewReportController(req, res) {
             ...interViewReportByAi
         })
 
+        user.credits -= 1
+        await user.save()
+
         res.status(201).json({
             message: "Interview report generated successfully.",
-            interviewReport
+            interviewReport,
+            creditsRemaining: user.credits
         })
     } catch (error) {
         console.error("Error in generateInterViewReportController:", error)
