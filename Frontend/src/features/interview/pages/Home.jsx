@@ -3,13 +3,16 @@ import "../style/home.scss"
 import { useInterview } from '../hooks/useInterview.js'
 import { useNavigate } from 'react-router'
 import Navbar from '../../auth/components/Navbar'
+import { useAuth } from '../../auth/hooks/useAuth'
 
 const Home = () => {
 
     const { loading, generateReport, reports, deleteReport } = useInterview()
+    const { credits } = useAuth()
     const [ jobDescription, setJobDescription ] = useState("")
     const [ selfDescription, setSelfDescription ] = useState("")
     const [ resumeFile, setResumeFile ] = useState(null)
+    const [ creditError, setCreditError ] = useState("")
     const resumeInputRef = useRef()
 
     const navigate = useNavigate()
@@ -22,9 +25,18 @@ const Home = () => {
     }
 
     const handleGenerateReport = async () => {
+        setCreditError("")
+
+        if (credits <= 0) {
+            setCreditError("You have no free credits remaining. Each generation uses 1 credit.")
+            return
+        }
+
         const fileToUpload = resumeFile || (resumeInputRef.current?.files?.[0] || null)
         const data = await generateReport({ jobDescription, selfDescription, resumeFile: fileToUpload })
-        navigate(`/interview/${data._id}`)
+        if (data) {
+            navigate(`/interview/${data._id}`)
+        }
     }
 
     if (loading) {
@@ -145,6 +157,14 @@ const Home = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* Credit Error */}
+                {creditError && (
+                    <div className='credit-error'>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <span>{creditError}</span>
+                    </div>
+                )}
 
                 {/* Card Footer */}
                 <div className='interview-card__footer'>

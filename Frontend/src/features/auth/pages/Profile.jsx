@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router'
 import './Profile.scss'
 
 const Profile = () => {
-    const { user } = useAuth()
+    const { user, credits } = useAuth()
     const { reports } = useInterview()
     const navigate = useNavigate()
 
@@ -57,6 +57,10 @@ const Profile = () => {
                                             : 0}%
                                     </span>
                                     <span className="stat-lbl">Highest Match Score</span>
+                                </div>
+                                <div className="stat-card">
+                                    <span className="stat-val">{credits}</span>
+                                    <span className="stat-lbl">Credits Remaining</span>
                                 </div>
                             </div>
                         </div>

@@ -1,12 +1,14 @@
 import { getAllInterviewReports, generateInterviewReport, getInterviewReportById, generateResumePdf, deleteInterviewReport } from "../services/interview.api"
 import { useContext, useEffect } from "react"
 import { InterviewContext } from "../interview.context"
+import { AuthContext } from "../../auth/auth.context"
 import { useParams } from "react-router"
 
 
 export const useInterview = () => {
 
     const context = useContext(InterviewContext)
+    const { updateCredits } = useContext(AuthContext)
     const { interviewId } = useParams()
 
     if (!context) {
@@ -21,6 +23,9 @@ export const useInterview = () => {
         try {
             response = await generateInterviewReport({ jobDescription, selfDescription, resumeFile })
             setReport(response.interviewReport)
+            if (response.creditsRemaining !== undefined) {
+                updateCredits(response.creditsRemaining)
+            }
         } catch (error) {
             console.log(error)
         } finally {
