@@ -60,6 +60,50 @@ $accent:         #ff2d78;
         gap: 1rem;
     }
 
+    .plan-badge {
+        padding: 0.2rem 0.6rem;
+        border-radius: 2rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+
+        &--monthly {
+            background: rgba(#6366f1, 0.15);
+            border: 1px solid rgba(#6366f1, 0.4);
+            color: #818cf8;
+        }
+
+        &--yearly {
+            background: rgba(#22c55e, 0.15);
+            border: 1px solid rgba(#22c55e, 0.4);
+            color: #4ade80;
+        }
+    }
+
+    .upgrade-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.3rem 0.75rem;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        border: none;
+        border-radius: 2rem;
+        color: #fff;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.2s;
+
+        svg {
+            flex-shrink: 0;
+        }
+
+        &:hover {
+            opacity: 0.9;
+        }
+    }
+
     .credits-badge {
         display: flex;
         align-items: center;
