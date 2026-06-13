@@ -55,7 +55,9 @@ async function registerUserController(req, res) {
                 id: user._id,
                 username: user.username,
                 email: user.email,
-                credits: user.credits
+                credits: user.credits,
+                subscriptionPlan: user.subscriptionPlan,
+                subscriptionExpiry: user.subscriptionExpiry
             }
         })
     } catch (err) {
@@ -117,7 +119,9 @@ async function loginUserController(req, res) {
             id: user._id,
             username: user.username,
             email: user.email,
-            credits: user.credits
+            credits: user.credits,
+            subscriptionPlan: user.subscriptionPlan,
+            subscriptionExpiry: user.subscriptionExpiry
         }
     })
 }
@@ -165,7 +169,9 @@ async function getMeController(req, res) {
             id: user._id,
             username: user.username,
             email: user.email,
-            credits: user.credits
+            credits: user.credits,
+            subscriptionPlan: user.subscriptionPlan,
+            subscriptionExpiry: user.subscriptionExpiry
         }
     })
 
