@@ -6,11 +6,19 @@ import { useNavigate } from 'react-router'
 import './Profile.scss'
 
 const Profile = () => {
-    const { user, credits } = useAuth()
+    const { user, credits, subscriptionPlan, subscriptionExpiry } = useAuth()
     const { reports } = useInterview()
     const navigate = useNavigate()
 
     if (!user) return null
+
+    const isSubscribed = subscriptionPlan && subscriptionPlan !== "free"
+    const formatDate = (dateStr) => {
+        if (!dateStr) return "N/A"
+        return new Date(dateStr).toLocaleDateString('en-IN', {
+            year: 'numeric', month: 'long', day: 'numeric'
+        })
+    }
 
     return (
         <div className="profile-page-wrapper">
@@ -23,7 +31,13 @@ const Profile = () => {
                             {user.username.charAt(0).toUpperCase()}
                         </div>
                         <h2>{user.username}</h2>
-                        <span className="profile-role">GeniusPilot User</span>
+                        {isSubscribed ? (
+                            <span className={`plan-badge-label plan-badge-label--${subscriptionPlan}`}>
+                                {subscriptionPlan === "monthly" ? "Monthly Plan" : "Yearly Plan"}
+                            </span>
+                        ) : (
+                            <span className="plan-badge-label plan-badge-label--free">Free Plan</span>
+                        )}
                     </div>
 
                     <div className="profile-card__body">
@@ -41,6 +55,18 @@ const Profile = () => {
                                 <span className="detail-label">Email Address</span>
                                 <span className="detail-value">{user.email}</span>
                             </div>
+                            <div className="detail-item">
+                                <span className="detail-label">Plan</span>
+                                <span className="detail-value" style={{ textTransform: 'capitalize' }}>
+                                    {isSubscribed ? `${subscriptionPlan} Plan` : 'Free Plan'}
+                                </span>
+                            </div>
+                            {isSubscribed && subscriptionExpiry && (
+                                <div className="detail-item">
+                                    <span className="detail-label">Plan Expiry</span>
+                                    <span className="detail-value">{formatDate(subscriptionExpiry)}</span>
+                                </div>
+                            )}
                         </div>
 
                         <div className="profile-stats">
