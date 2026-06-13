@@ -25,8 +25,17 @@ const userSchema = new mongoose.Schema({
     },
     credits: {
         type: Number,
-        default: 10,
+        default: 5,
         min: 0
+    },
+    subscriptionPlan: {
+        type: String,
+        enum: ["free", "monthly", "yearly"],
+        default: "free"
+    },
+    subscriptionExpiry: {
+        type: Date,
+        default: null
     }
 }, {
     timestamps: true
