@@ -1,21 +1,41 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import "../style/home.scss"
 import { useInterview } from '../hooks/useInterview.js'
 import { useNavigate } from 'react-router'
 import Navbar from '../../auth/components/Navbar'
 import { useAuth } from '../../auth/hooks/useAuth'
+import SubscriptionModal from '../../payment/components/SubscriptionModal'
 
 const Home = () => {
 
     const { loading, generateReport, reports, deleteReport } = useInterview()
-    const { credits } = useAuth()
+    const { credits, subscriptionPlan, updateSubscription } = useAuth()
     const [ jobDescription, setJobDescription ] = useState("")
     const [ selfDescription, setSelfDescription ] = useState("")
     const [ resumeFile, setResumeFile ] = useState(null)
     const [ creditError, setCreditError ] = useState("")
+    const [ showSubscription, setShowSubscription ] = useState(false)
+    const [ subscriptionSource, setSubscriptionSource ] = useState("") // "auto" or "manual"
     const resumeInputRef = useRef()
 
     const navigate = useNavigate()
+
+    // Auto-show subscription modal when credits <= 2 and user is on free plan
+    useEffect(() => {
+        if (credits <= 2 && credits > 0 && (!subscriptionPlan || subscriptionPlan === "free")) {
+            setSubscriptionSource("auto")
+            setShowSubscription(true)
+        }
+    }, [ credits, subscriptionPlan ])
+
+    const onCreditsAdded = (newCredits, plan, expiry) => {
+        updateSubscription(plan, expiry)
+    }
+
+    const handleCloseSubscription = () => {
+        setShowSubscription(false)
+        setSubscriptionSource("")
+    }
 
     const handleFileChange = (e) => {
         const file = e.target.files[0]
@@ -219,6 +239,11 @@ const Home = () => {
                 <a href='#'>Terms of Service</a>
                 <a href='#'>Help Center</a>
             </footer>
+                    <SubscriptionModal 
+                        isOpen={showSubscription} 
+                        onClose={handleCloseSubscription}
+                        onCreditsAdded={onCreditsAdded}
+                    />
             </div>
         </div>
     )
