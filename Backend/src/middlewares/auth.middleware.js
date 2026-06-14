@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken")
-const tokenBlacklistModel = require("../models/blacklist.model")
+const { getRedisClient } = require("../config/redis")
 
 
 
@@ -13,14 +13,18 @@ async function authUser(req, res, next) {
         })
     }
 
-    const isTokenBlacklisted = await tokenBlacklistModel.findOne({
-        token
-    })
+    try {
+        const isTokenBlacklisted = await getRedisClient().exists(`bl:${token}`)
 
-    if (isTokenBlacklisted) {
-        return res.status(401).json({
-            message: "token is invalid"
-        })
+        if (isTokenBlacklisted) {
+            return res.status(401).json({
+                message: "token is invalid"
+            })
+        }
+    } catch (err) {
+        // Fail open: if Redis is unreachable, fall back to JWT verification alone
+        // rather than locking every user out of the app.
+        console.error("Redis blacklist check failed:", err.message)
     }
 
     try {
