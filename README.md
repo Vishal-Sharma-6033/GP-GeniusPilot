@@ -51,6 +51,7 @@ GP-GeniusPilot/
 Make sure you have the following installed on your machine:
 - **Node.js** (v18.0.0 or higher recommended)
 - **MongoDB** (Local Community Edition or Atlas Cloud Database URI)
+- **Redis** (Local instance or hosted URI — used for JWT blacklisting and rate limiting)
 - **OpenAI API Key** (or compatible provider endpoints)
 
 ---
@@ -63,10 +64,18 @@ Create a `.env` file inside the `/Backend` directory and define the following va
 ```ini
 PORT=3000
 MONGO_URI=your_mongodb_connection_uri
+REDIS_URL=redis://127.0.0.1:6379
 JWT_SECRET=your_jwt_signing_token
 OPENAI_API_KEY=your_openai_api_credential
 OPENAI_MODEL=gpt-4o-mini
 ```
+
+> [!NOTE]
+> **Redis** powers two backend features:
+> - **JWT blacklisting** — on logout the token is stored in Redis with a TTL matching its expiry, so it auto-evicts (no unbounded growth). The auth middleware checks this on every request.
+> - **Rate limiting** — the AI report generation endpoint (`POST /api/interview/`) is capped at 5 requests/minute/user to protect the OpenAI + Puppeteer path.
+>
+> Both features **fail open** — if Redis is unavailable the app still runs, it just logs a warning and skips enforcement.
 
 *Note: The backend implements CORS authorization targeting `http://localhost:5173` (default React client dev port).*
 
