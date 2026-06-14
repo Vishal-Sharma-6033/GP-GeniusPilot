@@ -1,7 +1,7 @@
 const userModel = require("../models/user.model")
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
-const tokenBlacklistModel = require("../models/blacklist.model")
+const { getRedisClient } = require("../config/redis")
 const { getAuthCookieOptions } = require("../utils/auth.cookie")
 
 /**
@@ -136,7 +136,20 @@ async function logoutUserController(req, res) {
     const token = req.cookies.token
 
     if (token) {
-        await tokenBlacklistModel.create({ token })
+        try {
+            // Blacklist the token in Redis only until it would naturally expire,
+            // so entries auto-evict (no growing collection, no manual cleanup).
+            const decoded = jwt.decode(token)
+            const nowSeconds = Math.floor(Date.now() / 1000)
+            const ttl = decoded && decoded.exp ? decoded.exp - nowSeconds : 0
+
+            if (ttl > 0) {
+                await getRedisClient().set(`bl:${token}`, "1", "EX", ttl)
+            }
+        } catch (err) {
+            // Don't fail logout if Redis is unavailable — the cookie is still cleared.
+            console.error("Failed to blacklist token in Redis:", err.message)
+        }
     }
 
     res.clearCookie("token", getAuthCookieOptions())
