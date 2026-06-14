@@ -88,7 +88,7 @@ async function verifyPaymentController(req, res) {
                 status: "paid",
                 creditsAdded: getCreditsForPlan(plan)
             },
-            { new: true }
+            { returnDocument: "after" }
         )
 
         if (!order) {
@@ -108,7 +108,7 @@ async function verifyPaymentController(req, res) {
                 subscriptionPlan: plan,
                 subscriptionExpiry: expiryDate
             },
-            { new: true }
+            { returnDocument: "after" }
         )
 
         res.status(200).json({

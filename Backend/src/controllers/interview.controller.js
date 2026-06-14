@@ -183,7 +183,7 @@ async function updateProgressController(req, res) {
         const interviewReport = await interviewReportModel.findOneAndUpdate(
             { _id: interviewId, user: req.user.id },
             { [field]: progress },
-            { new: true }
+            { returnDocument: "after" }
         )
 
         if (!interviewReport) {
