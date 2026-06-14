@@ -4,11 +4,7 @@ const jwt = require("jsonwebtoken")
 const { getRedisClient } = require("../config/redis")
 const { getAuthCookieOptions } = require("../utils/auth.cookie")
 
-/**
- * @name registerUserController
- * @description register a new user, expects username, email and password in the request body
- * @access Public
- */
+
 async function registerUserController(req, res) {
 
     const { username, email, password } = req.body
@@ -75,11 +71,6 @@ async function registerUserController(req, res) {
 }
 
 
-/**
- * @name loginUserController
- * @description login a user, expects email and password in the request body
- * @access Public
- */
 async function loginUserController(req, res) {
 
     const { email, password } = req.body
@@ -127,18 +118,11 @@ async function loginUserController(req, res) {
 }
 
 
-/**
- * @name logoutUserController
- * @description clear token from user cookie and add the token in blacklist
- * @access public
- */
 async function logoutUserController(req, res) {
     const token = req.cookies.token
 
     if (token) {
         try {
-            // Blacklist the token in Redis only until it would naturally expire,
-            // so entries auto-evict (no growing collection, no manual cleanup).
             const decoded = jwt.decode(token)
             const nowSeconds = Math.floor(Date.now() / 1000)
             const ttl = decoded && decoded.exp ? decoded.exp - nowSeconds : 0
@@ -147,7 +131,6 @@ async function logoutUserController(req, res) {
                 await getRedisClient().set(`bl:${token}`, "1", "EX", ttl)
             }
         } catch (err) {
-            // Don't fail logout if Redis is unavailable — the cookie is still cleared.
             console.error("Failed to blacklist token in Redis:", err.message)
         }
     }
@@ -159,11 +142,7 @@ async function logoutUserController(req, res) {
     })
 }
 
-/**
- * @name getMeController
- * @description get the current logged in user details.
- * @access private
- */
+
 async function getMeController(req, res) {
 
     const user = await userModel.findById(req.user.id)

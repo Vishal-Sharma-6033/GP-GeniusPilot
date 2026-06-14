@@ -23,12 +23,7 @@ function getRazorpayInstance() {
     return instance
 }
 
-/**
- * Create a Razorpay order for subscription
- * @param {Object} params
- * @param {string} params.plan - "monthly" or "yearly"
- * @returns {Promise<Object>} razorpayOrder
- */
+
 async function createSubscriptionOrder({ plan }) {
     const razorpay = getRazorpayInstance()
 
@@ -49,14 +44,7 @@ async function createSubscriptionOrder({ plan }) {
     return order
 }
 
-/**
- * Verify Razorpay payment signature
- * @param {Object} params
- * @param {string} params.razorpayOrderId
- * @param {string} params.razorpayPaymentId
- * @param {string} params.razorpaySignature
- * @returns {boolean}
- */
+
 function verifyPaymentSignature({ razorpayOrderId, razorpayPaymentId, razorpaySignature }) {
     const keySecret = process.env.RAZORPAY_KEY_SECRET
     const expectedSignature = crypto
@@ -67,23 +55,13 @@ function verifyPaymentSignature({ razorpayOrderId, razorpayPaymentId, razorpaySi
     return expectedSignature === razorpaySignature
 }
 
-/**
- * Get credits to add based on plan
- * @param {string} plan 
- * @returns {number}
- */
+
 function getCreditsForPlan(plan) {
-    // Monthly: 100 credits, Yearly: 1200 credits (2 months free)
     return plan === "monthly" ? 100 : 1200
 }
 
-/**
- * Get expiry duration in ms
- * @param {string} plan 
- * @returns {number}
- */
+
 function getSubscriptionDurationMs(plan) {
-    // Monthly: 30 days, Yearly: 365 days
     return plan === "monthly" ? 30 * 24 * 60 * 60 * 1000 : 365 * 24 * 60 * 60 * 1000
 }
 

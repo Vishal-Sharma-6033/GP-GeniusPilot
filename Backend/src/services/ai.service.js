@@ -52,10 +52,8 @@ const interviewReportSchema = z.object({
 function extractJson(text) {
     text = text.trim()
 
-    // Remove markdown code fences (```json ... ``` or ``` ... ```)
     text = text.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim()
 
-    // Some models prefix with the schema name — find the outermost JSON object
     const firstBrace = text.indexOf('{')
     const lastBrace = text.lastIndexOf('}')
     if (firstBrace !== -1 && lastBrace !== -1) {
@@ -66,19 +64,14 @@ function extractJson(text) {
 }
 
 function repairJson(text) {
-    // Remove trailing commas before closing braces/brackets
     text = text.replace(/,(\s*[}\]])/g, '$1')
 
-    // Remove comments (// and /* */)
     text = text.replace(/\/\/.*$/gm, '')
     text = text.replace(/\/\*[\s\S]*?\*\//g, '')
 
-    // Replace single quotes with double quotes (only within values, not already double-quoted)
-    // This is a simple approach — replace single quotes used for keys/values
     text = text.replace(/(?<=:\s*)'([^']*)'(?=\s*[,}\]])/g, '"$1"')
     text = text.replace(/(?<=[{,]\s*)'([^']*)'(?=\s*:)/g, '"$1"')
 
-    // Unescape unescaped quotes inside strings (simple fix)
     text = text.replace(/(?<=:"[^"]*?)"(?=[^"]*?")/g, '\\"')
 
     return text
@@ -104,7 +97,6 @@ ${JSON.stringify(jsonSchema, null, 2)}`
     let rawText = response.choices[0].message.content || ''
     let text = extractJson(rawText)
 
-    // Attempt to parse with progressively more aggressive repair
     let parsed = null
     let lastError = null
 

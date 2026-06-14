@@ -22,8 +22,7 @@ async function authUser(req, res, next) {
             })
         }
     } catch (err) {
-        // Fail open: if Redis is unreachable, fall back to JWT verification alone
-        // rather than locking every user out of the app.
+       
         console.error("Redis blacklist check failed:", err.message)
     }
 

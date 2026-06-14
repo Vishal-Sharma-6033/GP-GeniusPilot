@@ -7,12 +7,7 @@ const {
     getSubscriptionDurationMs
 } = require("../services/razorpay.service")
 
-/**
- * @name createOrderController
- * @description Create a Razorpay order for subscription
- * @body { plan: "monthly" | "yearly" }
- * @access Private
- */
+
 async function createOrderController(req, res) {
     try {
         const { plan } = req.body
@@ -54,12 +49,7 @@ async function createOrderController(req, res) {
     }
 }
 
-/**
- * @name verifyPaymentController
- * @description Verify Razorpay payment and update user credits
- * @body { razorpayOrderId, razorpayPaymentId, razorpaySignature, plan }
- * @access Private
- */
+
 async function verifyPaymentController(req, res) {
     try {
         const { razorpayOrderId, razorpayPaymentId, razorpaySignature, plan } = req.body
@@ -137,11 +127,7 @@ async function verifyPaymentController(req, res) {
     }
 }
 
-/**
- * @name getSubscriptionStatusController
- * @description Get current user's subscription status
- * @access Private
- */
+
 async function getSubscriptionStatusController(req, res) {
     try {
         const user = await userModel.findById(req.user.id)
