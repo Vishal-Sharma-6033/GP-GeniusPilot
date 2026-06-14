@@ -73,10 +73,8 @@ REDIS_URL=redis://127.0.0.1:6379
 JWT_SECRET=your_jwt_signing_secret
 OPENAI_API_KEY=your_openai_api_credential
 OPENAI_MODEL=gpt-4o-mini
-# OPENAI_BASE_URL=                 # optional — for OpenAI-compatible providers
 RAZORPAY_KEY_ID=your_razorpay_key_id
 RAZORPAY_KEY_SECRET=your_razorpay_key_secret
-# NODE_ENV=production              # enables secure, cross-site cookies
 ```
 
 > [!NOTE]
