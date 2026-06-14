@@ -15,7 +15,7 @@ const generateLimiter = createRateLimiter({
 
 
 
-interviewRouter.post("/", authMiddleware.authUser, upload.single("resume"), interviewController.generateInterViewReportController)
+interviewRouter.post("/", authMiddleware.authUser, generateLimiter, upload.single("resume"), interviewController.generateInterViewReportController)
 
 
 interviewRouter.get("/report/:interviewId", authMiddleware.authUser, interviewController.getInterviewReportByIdController)
