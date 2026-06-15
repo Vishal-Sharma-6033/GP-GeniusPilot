@@ -40,34 +40,45 @@ async function generateInterViewReportController(req, res) {
             })
         }
 
-        const user = await userModel.findById(req.user.id)
-        if (!user || user.credits <= 0) {
+        // Atomically reserve one credit. Only succeeds if the user still has
+        // credits, which prevents a concurrent double-spend race.
+        const user = await userModel.findOneAndUpdate(
+            { _id: req.user.id, credits: { $gt: 0 } },
+            { $inc: { credits: -1 } },
+            { returnDocument: "after" }
+        )
+
+        if (!user) {
             return res.status(403).json({
                 message: "You have no free credits remaining. Each generation uses 1 credit."
             })
         }
 
-        const interViewReportByAi = await generateInterviewReport({
-            resume: resumeText,
-            selfDescription,
-            jobDescription
-        })
+        let interviewReport
+        try {
+            const interViewReportByAi = await generateInterviewReport({
+                resume: resumeText,
+                selfDescription,
+                jobDescription
+            })
 
-        const techCount = (interViewReportByAi.technicalQuestions || []).length
-        const behCount = (interViewReportByAi.behavioralQuestions || []).length
+            const techCount = (interViewReportByAi.technicalQuestions || []).length
+            const behCount = (interViewReportByAi.behavioralQuestions || []).length
 
-        const interviewReport = await interviewReportModel.create({
-            user: req.user.id,
-            resume: resumeText,
-            selfDescription,
-            jobDescription,
-            ...interViewReportByAi,
-            technicalProgress: Array(techCount).fill(false),
-            behavioralProgress: Array(behCount).fill(false)
-        })
-
-        user.credits -= 1
-        await user.save()
+            interviewReport = await interviewReportModel.create({
+                user: req.user.id,
+                resume: resumeText,
+                selfDescription,
+                jobDescription,
+                ...interViewReportByAi,
+                technicalProgress: Array(techCount).fill(false),
+                behavioralProgress: Array(behCount).fill(false)
+            })
+        } catch (genErr) {
+            // Refund the reserved credit if generation or persistence failed.
+            await userModel.updateOne({ _id: req.user.id }, { $inc: { credits: 1 } })
+            throw genErr
+        }
 
         res.status(201).json({
             message: "Interview report generated successfully.",
@@ -118,7 +129,10 @@ async function getAllInterviewReportsController(req, res) {
 async function generateResumePdfController(req, res) {
     const { interviewReportId } = req.params
 
-    const interviewReport = await interviewReportModel.findById(interviewReportId)
+    const interviewReport = await interviewReportModel.findOne({
+        _id: interviewReportId,
+        user: req.user.id
+    })
 
     if (!interviewReport) {
         return res.status(404).json({
@@ -172,9 +186,15 @@ async function updateProgressController(req, res) {
         const { interviewId } = req.params
         const { type, progress } = req.body
 
-        if (!type || !progress || !Array.isArray(progress)) {
+        if (type !== 'technical' && type !== 'behavioral') {
             return res.status(400).json({
-                message: "Please provide 'type' ('technical' or 'behavioral') and 'progress' array."
+                message: "Please provide 'type' as either 'technical' or 'behavioral'."
+            })
+        }
+
+        if (!Array.isArray(progress) || !progress.every(p => typeof p === 'boolean')) {
+            return res.status(400).json({
+                message: "Please provide 'progress' as an array of booleans."
             })
         }
 
