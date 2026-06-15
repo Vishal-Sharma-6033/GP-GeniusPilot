@@ -52,9 +52,9 @@ async function createOrderController(req, res) {
 
 async function verifyPaymentController(req, res) {
     try {
-        const { razorpayOrderId, razorpayPaymentId, razorpaySignature, plan } = req.body
+        const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body
 
-        if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature || !plan) {
+        if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
             return res.status(400).json({
                 message: "Missing payment verification details."
             })
@@ -68,9 +68,9 @@ async function verifyPaymentController(req, res) {
         })
 
         if (!isValid) {
-            // Mark order as failed
+            // Mark order as failed (only while still pending, so a paid order is never flipped)
             await orderModel.findOneAndUpdate(
-                { razorpayOrderId },
+                { razorpayOrderId, status: "created" },
                 { status: "failed" }
             )
 
@@ -79,27 +79,34 @@ async function verifyPaymentController(req, res) {
             })
         }
 
-        // Update order in database
+        // The plan is taken from the stored order, never from the client, so a
+        // user cannot pay for a cheaper plan and claim a more expensive one.
+        // Matching status: "created" makes this idempotent: a replayed request
+        // finds no pending order, so credits are never granted twice.
         const order = await orderModel.findOneAndUpdate(
-            { razorpayOrderId, user: req.user.id },
+            { razorpayOrderId, user: req.user.id, status: "created" },
             {
                 razorpayPaymentId,
                 razorpaySignature,
-                status: "paid",
-                creditsAdded: getCreditsForPlan(plan)
+                status: "paid"
             },
             { returnDocument: "after" }
         )
 
         if (!order) {
-            return res.status(404).json({
-                message: "Order not found."
+            // Either the order doesn't exist for this user, or it was already processed.
+            return res.status(409).json({
+                message: "Order not found or has already been processed."
             })
         }
 
         // Update user credits and subscription
+        const plan = order.plan
         const creditsToAdd = getCreditsForPlan(plan)
         const expiryDate = new Date(Date.now() + getSubscriptionDurationMs(plan))
+
+        order.creditsAdded = creditsToAdd
+        await order.save()
 
         const user = await userModel.findByIdAndUpdate(
             req.user.id,
