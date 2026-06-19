@@ -13,6 +13,15 @@ const generateLimiter = createRateLimiter({
     message: "You're generating reports too quickly. Please wait a minute and try again."
 })
 
+// The resume-PDF endpoint runs a full OpenAI call + Puppeteer render on every
+// request, so it must be throttled to prevent cost-abuse from a single user.
+const resumePdfLimiter = createRateLimiter({
+    keyPrefix: "rl:pdf",
+    windowSeconds: 60,
+    max: 5,
+    message: "You're generating resume PDFs too quickly. Please wait a minute and try again."
+})
+
 
 
 interviewRouter.post("/", authMiddleware.authUser, generateLimiter, upload.single("resume"), interviewController.generateInterViewReportController)
