@@ -78,7 +78,7 @@ function repairJson(text) {
 }
 
 async function callModelForJson({ prompt, schema, schemaName }) {
-    const model = process.env.OPENAI_MODEL || "auto"
+    const model = process.env.OPENAI_MODEL || "gpt-4o-mini"
     const openai = getOpenAIClient()
 
     const jsonSchema = zodToJsonSchema(schema, schemaName)
