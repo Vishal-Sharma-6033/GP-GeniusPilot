@@ -35,3 +35,7 @@ lerna-debug.log*
 
 # Project Analysis
 PROJECT_ANALYSIS.md
+
+# Nginx & Local Server Cache/Logs
+tmp/
+logs/
