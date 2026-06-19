@@ -33,7 +33,7 @@ const interviewReportSchema = z.object({
         answer: z.string().describe("How to answer this question, what points to cover, what approach to take etc.")
     })).min(10).describe("Technical questions that can be asked in the interview along with their intention and how to answer them. You must generate at least 10 questions."),
     behavioralQuestions: z.array(z.object({
-        question: z.string().describe("The technical question can be asked in the interview"),
+        question: z.string().describe("The behavioral question that can be asked in the interview"),
         intention: z.string().describe("The intention of interviewer behind asking this question"),
         answer: z.string().describe("How to answer this question, what points to cover, what approach to take etc.")
     })).min(10).describe("Behavioral questions that can be asked in the interview along with their intention and how to answer them. You must generate at least 10 questions."),
@@ -85,47 +85,72 @@ async function callModelForJson({ prompt, schema, schemaName }) {
     const systemPrompt = `You are a helpful assistant. You must output ONLY a valid JSON object matching this JSON Schema (do not include any conversational text, markdown code blocks, or explanations):
 ${JSON.stringify(jsonSchema, null, 2)}`
 
-    const response = await openai.chat.completions.create({
-        model,
-        messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: prompt }
-        ],
-        temperature: 0.0
-    })
+    const messages = [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: prompt }
+    ]
 
-    let rawText = response.choices[0].message.content || ''
-    let text = extractJson(rawText)
-
-    let parsed = null
-    let lastError = null
-
-    for (const attempt of [
-        (t) => JSON.parse(t),
-        (t) => JSON.parse(repairJson(t)),
-    ]) {
+    const attempts = 3
+    for (let i = 0; i < attempts; i++) {
         try {
-            parsed = attempt(text)
-            break
-        } catch (err) {
-            lastError = err
+            const response = await openai.chat.completions.create({
+                model,
+                response_format: { type: "json_object" },
+                messages,
+                temperature: i === 0 ? 0.0 : 0.2
+            })
+
+            const rawText = response.choices[0].message.content || ''
+            const text = extractJson(rawText)
+
+            let parsed = null
+            let lastError = null
+
+            for (const attempt of [
+                (t) => JSON.parse(t),
+                (t) => JSON.parse(repairJson(t)),
+            ]) {
+                try {
+                    parsed = attempt(text)
+                    break
+                } catch (err) {
+                    lastError = err
+                }
+            }
+
+            if (!parsed) {
+                if (i === attempts - 1) {
+                    const errObj = new Error('Model output is not valid JSON')
+                    errObj.raw = rawText
+                    errObj.parseError = lastError ? lastError.message : 'Unknown'
+                    throw errObj
+                }
+                messages.push({ role: "assistant", content: rawText })
+                messages.push({ role: "user", content: `The response was not valid JSON. Error: ${lastError ? lastError.message : 'Parse error'}. Please output a valid JSON object matching the schema.` })
+                continue
+            }
+
+            try {
+                return schema.parse(parsed)
+            } catch (err) {
+                if (i === attempts - 1) {
+                    const errObj = new Error('Model output does not match expected schema')
+                    errObj.raw = rawText
+                    errObj.parseError = err.message
+                    throw errObj
+                }
+                const zodErrors = err.errors ? err.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ') : err.message
+                messages.push({ role: "assistant", content: rawText })
+                messages.push({
+                    role: "user",
+                    content: `The JSON output did not match the expected schema. Errors:\n${zodErrors}\n\nPlease correct the output. Ensure arrays have at least the minimum required number of elements (e.g., at least 10 items in 'technicalQuestions', at least 10 items in 'behavioralQuestions', and at least 15 items in 'preparationPlan').`
+                })
+            }
+        } catch (error) {
+            if (i === attempts - 1) {
+                throw error
+            }
         }
-    }
-
-    if (!parsed) {
-        const errObj = new Error('Model output is not valid JSON')
-        errObj.raw = rawText
-        errObj.parseError = lastError ? lastError.message : 'Unknown'
-        throw errObj
-    }
-
-    try {
-        return schema.parse(parsed)
-    } catch (err) {
-        const errObj = new Error('Model output does not match expected schema')
-        errObj.raw = rawText
-        errObj.parseError = err.message
-        throw errObj
     }
 }
 
