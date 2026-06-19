@@ -11,6 +11,8 @@ async function connectToDB() {
     }
     catch (err) {
         console.error("Failed to connect to Database:", err.message)
+        // Don't run a server that can't reach the database — every request would fail.
+        process.exit(1)
     }
 }
 
