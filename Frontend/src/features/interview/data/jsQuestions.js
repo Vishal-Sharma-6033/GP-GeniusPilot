@@ -75,6 +75,93 @@ Here, count is private — it cannot be accessed directly from outside createCou
 
 Other real-world uses: React's useState hook uses closures to capture state snapshots, memoization (caching) functions close over a cache Map, and event handlers in loops capture loop variables via closures.`,
     },
+    {
+        id: 'js-4',
+        question: 'What is the difference between Promise.all(), Promise.allSettled(), Promise.race(), and Promise.any()?',
+        difficulty: 'Hard',
+        intention: 'Tests knowledge of concurrent async patterns — critical for building robust APIs and handling parallel data fetching.',
+        answer: `All four combinators accept an iterable of Promises but differ in how they resolve/reject:
+
+Promise.all(promises)
+  - Resolves when ALL promises resolve → returns array of results in order.
+  - Short-circuits and rejects immediately if ANY promise rejects.
+  - Use when all results are required (parallel API calls where any failure is fatal).
+
+Promise.allSettled(promises)
+  - Always resolves (never rejects) after ALL promises settle.
+  - Returns array of {status: 'fulfilled'|'rejected', value|reason} objects.
+  - Use when you want all results regardless of individual failures (fire-and-forget batch ops).
+
+Promise.race(promises)
+  - Settles as soon as the FIRST promise settles (resolves or rejects).
+  - Use for timeouts: race a real request against a setTimeout-rejection.
+
+Promise.any(promises)
+  - Resolves when the FIRST promise RESOLVES; ignores rejections.
+  - Rejects only if ALL promises reject → throws AggregateError.
+  - Use for fallback patterns (try multiple CDNs, first success wins).
+
+Memory tip: all=all-or-nothing, allSettled=wait for everyone, race=fastest wins, any=first success.`,
+    },
+    {
+        id: 'js-5',
+        question: 'Explain the "this" keyword in JavaScript. How does its value differ in regular functions vs arrow functions?',
+        difficulty: 'Medium',
+        intention: 'Evaluates understanding of execution context — a frequent source of bugs in callbacks and class methods.',
+        answer: `"this" refers to the execution context — the object that is currently executing the function. Its value is determined at call-time, not at definition-time (except for arrow functions).
+
+Rules for regular functions (dynamic "this"):
+1. Global call: this === window (browser) or {} (Node strict mode) or global (Node sloppy)
+2. Method call: obj.method() → this === obj
+3. Constructor call: new Fn() → this === newly created object
+4. Explicit binding: call/apply/bind → this === first argument
+
+Arrow functions (lexical "this"):
+  Arrow functions do NOT have their own "this". They inherit "this" from the enclosing lexical scope at definition-time. You cannot rebind them with call/apply/bind.
+
+Practical consequence:
+  class Timer {
+    constructor() { this.count = 0; }
+    start() {
+      // Regular function — "this" is undefined in strict mode callbacks:
+      setInterval(function() { this.count++; }, 1000); // ❌ breaks
+      // Arrow function — "this" is captured from start():
+      setInterval(() => { this.count++; }, 1000);      // ✅ works
+    }
+  }
+
+Common pitfall: destructuring a method from an object loses "this" context. Fix: bind in constructor or use arrow class fields.`,
+    },
+    {
+        id: 'js-6',
+        question: 'What are the most useful JavaScript array methods? Explain map(), filter(), reduce(), and find() with examples.',
+        difficulty: 'Easy',
+        intention: 'Tests practical fluency with functional programming patterns that are used daily in React and modern JS codebases.',
+        answer: `These are the core higher-order array methods every JS developer must know:
+
+map(callback) — Transforms every element; returns a new array of the same length.
+  [1, 2, 3].map(n => n * 2)  // [2, 4, 6]
+  Use: converting API data shapes, rendering lists in React.
+
+filter(callback) — Keeps only elements where callback returns true; returns a shorter (or same length) array.
+  [1, 2, 3, 4].filter(n => n % 2 === 0)  // [2, 4]
+  Use: search results, removing deleted items from state.
+
+reduce(callback, initialValue) — Accumulates elements into a single value (can be a number, object, or array).
+  [1, 2, 3].reduce((acc, n) => acc + n, 0)  // 6
+  Use: summing totals, grouping by key, flattening arrays.
+
+find(callback) — Returns the FIRST element where callback is true; returns undefined if none found.
+  [{id:1}, {id:2}].find(x => x.id === 2)  // {id:2}
+  Use: looking up an item by id in a local array.
+
+Bonus — findIndex(), some(), every():
+  findIndex → like find but returns the index.
+  some → true if at least one element passes.
+  every → true if all elements pass.
+
+Key rule: map/filter/reduce/find do NOT mutate the original array — they always return a new one.`,
+    },
 ]
 
 /**
