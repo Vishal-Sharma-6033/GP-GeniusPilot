@@ -1,0 +1,671 @@
+@use "sass:color";
+
+// ── Variables (matches project theme exactly) ────────────────────────────────
+$bg-page:       #0d1117;
+$bg-card:       #161b22;
+$bg-panel:      #1c2230;
+$bg-input:      #1e2535;
+$border-color:  #2a3348;
+$text-primary:  #e6edf3;
+$text-muted:    #7d8590;
+$accent:        #ff2d78;
+$font-stack:    system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$navbar-height: 57px; // sticky navbar height
+
+$difficulty-easy:   #3fb950;
+$difficulty-medium: #f5a623;
+$difficulty-hard:   #ff4d4d;
+
+// ── Scrollbar ────────────────────────────────────────────────────────────────
+*::-webkit-scrollbar { display: none; }
+
+// ── Outer wrapper (full page, flex column) ──────────────────────────────────
+.qb-page-wrapper {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: $bg-page;
+    overflow: hidden;          // prevent outer scroll; inner columns scroll
+}
+
+// ── Content area below navbar ────────────────────────────────────────────────
+.qb-page {
+    flex: 1;
+    min-height: 0;             // crucial: allows flex child to shrink
+    display: flex;
+    align-items: stretch;
+    padding: 1.25rem;
+    box-sizing: border-box;
+    background-color: $bg-page;
+    overflow: hidden;
+}
+
+// ── 3-Column card ────────────────────────────────────────────────────────────
+.qb-layout {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    background-color: $bg-card;
+    border: 1px solid $border-color;
+    border-radius: 1rem;
+    overflow: hidden;          // clip rounded corners
+    min-height: 0;
+}
+
+.qb-divider {
+    width: 1px;
+    background-color: $border-color;
+    flex-shrink: 0;
+    align-self: stretch;
+}
+
+// ── Left Nav (fixed width, scrollable) ───────────────────────────────────────
+.qb-nav {
+    width: 210px;
+    flex-shrink: 0;
+    padding: 1.5rem 0.875rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    overflow-y: auto;
+    background-color: $bg-card;
+
+    &__label {
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: $text-muted;
+        padding: 0 0.6rem;
+        margin-bottom: 0.4rem;
+        margin-top: 0.25rem;
+    }
+
+    &__item {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        width: 100%;
+        padding: 0.6rem 0.75rem;
+        background: none;
+        border: none;
+        border-radius: 0.5rem;
+        color: $text-muted;
+        font-family: $font-stack;
+        font-size: 0.85rem;
+        cursor: pointer;
+        text-align: left;
+        transition: background-color 0.15s, color 0.15s;
+        white-space: nowrap;
+
+        &:hover {
+            background-color: $bg-panel;
+            color: $text-primary;
+        }
+
+        &--active {
+            background-color: rgba($accent, 0.1);
+            color: $accent;
+
+            .qb-nav__icon {
+                border-color: rgba($accent, 0.35);
+                background-color: rgba($accent, 0.15);
+            }
+        }
+    }
+
+    &__icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 0.7rem;
+        font-weight: 800;
+        width: 22px;
+        height: 22px;
+        border-radius: 0.3rem;
+        background-color: $bg-panel;
+        border: 1px solid $border-color;
+        transition: all 0.15s;
+        line-height: 1;
+    }
+
+    &__badge {
+        margin-left: auto;
+        font-size: 0.6rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: $text-muted;
+        background-color: $bg-input;
+        border: 1px solid $border-color;
+        padding: 0.1rem 0.4rem;
+        border-radius: 2rem;
+    }
+
+    &__coming-soon {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        width: 100%;
+        padding: 0.6rem 0.75rem;
+        color: rgba($text-muted, 0.4);
+        font-family: $font-stack;
+        font-size: 0.85rem;
+        cursor: not-allowed;
+        border-radius: 0.5rem;
+        pointer-events: none;
+        white-space: nowrap;
+    }
+}
+
+// ── Center Content (scrollable, fills remaining width) ───────────────────────
+.qb-content {
+    flex: 1;
+    min-width: 0;              // crucial: prevents flex blowout
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 1.5rem 1.75rem;
+    box-sizing: border-box;
+    background-color: $bg-card;
+}
+
+// ── Page Header ───────────────────────────────────────────────────────────────
+.qb-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid $border-color;
+    flex-shrink: 0;
+
+    h2 {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: $text-primary;
+        margin: 0;
+        white-space: nowrap;
+    }
+
+    &__count {
+        font-size: 0.78rem;
+        color: $text-muted;
+        background-color: $bg-panel;
+        padding: 0.15rem 0.55rem;
+        border-radius: 2rem;
+        border: 1px solid $border-color;
+        white-space: nowrap;
+    }
+}
+
+// ── Progress Bar ──────────────────────────────────────────────────────────────
+.qb-progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    flex-shrink: 0;
+}
+
+.qb-progress-bar {
+    flex: 1;
+    height: 5px;
+    background-color: $bg-input;
+    border-radius: 3px;
+    overflow: hidden;
+
+    &__fill {
+        height: 100%;
+        background: linear-gradient(90deg, $accent, #a78bfa);
+        border-radius: 3px;
+        transition: width 0.4s ease;
+    }
+
+    &__label {
+        font-size: 0.73rem;
+        color: $text-muted;
+        flex-shrink: 0;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+}
+
+// ── Controls (search + filter) ────────────────────────────────────────────────
+.qb-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 1.25rem;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.qb-search {
+    position: relative;
+    flex: 1;
+    min-width: 160px;
+
+    &__icon {
+        position: absolute;
+        left: 0.7rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: $text-muted;
+        display: flex;
+        pointer-events: none;
+    }
+
+    input {
+        width: 100%;
+        padding: 0.5rem 0.75rem 0.5rem 2.1rem;
+        background-color: $bg-input;
+        border: 1px solid $border-color;
+        border-radius: 0.45rem;
+        color: $text-primary;
+        font-family: $font-stack;
+        font-size: 0.85rem;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.15s;
+
+        &::placeholder { color: rgba($text-muted, 0.65); }
+
+        &:focus {
+            border-color: rgba($accent, 0.45);
+            background-color: color.adjust($bg-input, $lightness: 2%);
+        }
+    }
+}
+
+.qb-filters {
+    display: flex;
+    gap: 0.35rem;
+    flex-shrink: 0;
+}
+
+.qb-filter-pill {
+    padding: 0.38rem 0.75rem;
+    border-radius: 2rem;
+    border: 1px solid $border-color;
+    background: none;
+    color: $text-muted;
+    font-size: 0.77rem;
+    font-weight: 500;
+    font-family: $font-stack;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+
+    &:hover {
+        border-color: rgba($accent, 0.35);
+        color: $text-primary;
+        background-color: rgba($accent, 0.05);
+    }
+
+    &--active {
+        border-color: $accent;
+        background-color: rgba($accent, 0.1);
+        color: $accent;
+    }
+
+    &--easy.qb-filter-pill--active   { border-color: $difficulty-easy;   background-color: rgba($difficulty-easy, 0.1);   color: $difficulty-easy; }
+    &--medium.qb-filter-pill--active { border-color: $difficulty-medium; background-color: rgba($difficulty-medium, 0.1); color: $difficulty-medium; }
+    &--hard.qb-filter-pill--active   { border-color: $difficulty-hard;   background-color: rgba($difficulty-hard, 0.1);   color: $difficulty-hard; }
+}
+
+// ── Question List ─────────────────────────────────────────────────────────────
+.qb-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    flex: 1;
+}
+
+.qb-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: $text-muted;
+    font-size: 0.9rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+
+    span { font-size: 2rem; }
+}
+
+// ── Question Cards ────────────────────────────────────────────────────────────
+.qb-card {
+    background-color: $bg-panel;
+    border: 1px solid $border-color;
+    border-radius: 0.55rem;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+
+    &:hover {
+        border-color: color.adjust($border-color, $lightness: 8%);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    &--reviewed {
+        border-color: rgba($difficulty-easy, 0.3);
+
+        .qb-card__index {
+            background-color: rgba($difficulty-easy, 0.12);
+            border-color: rgba($difficulty-easy, 0.3);
+            color: $difficulty-easy;
+        }
+    }
+
+    &__header {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.6rem;
+        padding: 0.85rem 1rem;
+        user-select: none;
+    }
+
+    // Circle checkbox button
+    &__check {
+        flex-shrink: 0;
+        background: none;
+        border: none;
+        padding: 2px;
+        cursor: pointer;
+        color: $text-muted;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.15s, background-color 0.15s;
+        margin-top: 1px;
+
+        &:hover { color: $accent; background-color: rgba($accent, 0.08); }
+
+        &--done {
+            color: $difficulty-easy;
+            &:hover { color: $difficulty-hard; }
+        }
+    }
+
+    // Clickable row (question + meta)
+    &__header-text {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.6rem;
+        flex: 1;
+        cursor: pointer;
+        min-width: 0;
+    }
+
+    &__index {
+        flex-shrink: 0;
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: $accent;
+        background-color: rgba($accent, 0.1);
+        border: 1px solid rgba($accent, 0.2);
+        border-radius: 0.28rem;
+        padding: 0.13rem 0.4rem;
+        margin-top: 3px;
+        white-space: nowrap;
+    }
+
+    &__question {
+        flex: 1;
+        margin: 0;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: $text-primary;
+        line-height: 1.55;
+        min-width: 0;
+        word-break: break-word;
+    }
+
+    &__meta {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    &__diff {
+        font-size: 0.63rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        padding: 0.1rem 0.42rem;
+        border-radius: 0.22rem;
+        border: 1px solid;
+        white-space: nowrap;
+
+        &--Easy   { color: $difficulty-easy;   background-color: rgba($difficulty-easy, 0.1);   border-color: rgba($difficulty-easy, 0.25); }
+        &--Medium { color: $difficulty-medium; background-color: rgba($difficulty-medium, 0.1); border-color: rgba($difficulty-medium, 0.25); }
+        &--Hard   { color: $difficulty-hard;   background-color: rgba($difficulty-hard, 0.1);   border-color: rgba($difficulty-hard, 0.25); }
+    }
+
+    &__chevron {
+        color: $text-muted;
+        transition: transform 0.2s;
+        display: flex;
+        flex-shrink: 0;
+
+        &--open {
+            transform: rotate(180deg);
+            color: $accent;
+        }
+    }
+
+    // Expanded answer body
+    &__body {
+        padding: 0.75rem 1rem 1rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        border-top: 1px solid $border-color;
+        background-color: color.adjust($bg-panel, $lightness: -1%);
+    }
+
+    &__section {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+
+        p {
+            margin: 0;
+            font-size: 0.83rem;
+            color: color.adjust($text-muted, $lightness: 18%);
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+    }
+
+    &__tag {
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 0.12rem 0.45rem;
+        border-radius: 0.22rem;
+        width: fit-content;
+
+        &--intention {
+            color: #a78bfa;
+            background-color: rgba(#a78bfa, 0.1);
+            border: 1px solid rgba(#a78bfa, 0.2);
+        }
+
+        &--answer {
+            color: $difficulty-easy;
+            background-color: rgba($difficulty-easy, 0.1);
+            border: 1px solid rgba($difficulty-easy, 0.2);
+        }
+    }
+}
+
+// ── Right Sidebar (fixed width, scrollable) ───────────────────────────────────
+.qb-sidebar {
+    width: 230px;
+    flex-shrink: 0;
+    padding: 1.5rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    overflow-y: auto;
+    background-color: $bg-card;
+}
+
+.qb-sidebar-divider {
+    height: 1px;
+    background-color: $border-color;
+    flex-shrink: 0;
+}
+
+// ── Progress Ring ─────────────────────────────────────────────────────────────
+.qb-ring {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+
+    &__label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+        color: $text-muted;
+        margin: 0;
+    }
+
+    &__wrap {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        align-self: center;
+
+        svg { overflow: visible; }
+    }
+
+    &__bg   { fill: none; stroke: $bg-input; }
+    &__fill { fill: none; stroke: url(#qb-ring-gradient); stroke-linecap: round; transition: stroke-dashoffset 0.5s ease; }
+
+    &__center {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: $font-stack;
+        pointer-events: none;
+    }
+
+    &__value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: $text-primary;
+        line-height: 1;
+    }
+
+    &__total {
+        font-size: 0.7rem;
+        color: $text-muted;
+    }
+
+    &__sub {
+        font-size: 0.74rem;
+        color: $text-muted;
+        text-align: center;
+        margin: 0;
+        align-self: center;
+    }
+}
+
+// ── Difficulty Breakdown ──────────────────────────────────────────────────────
+.qb-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+
+    &__label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+        color: $text-muted;
+        margin: 0;
+    }
+
+    &__list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    &__row {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        font-size: 0.82rem;
+    }
+
+    &__dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        flex-shrink: 0;
+
+        &--Easy   { background-color: $difficulty-easy; }
+        &--Medium { background-color: $difficulty-medium; }
+        &--Hard   { background-color: $difficulty-hard; }
+    }
+
+    &__name  { color: $text-muted; flex: 1; }
+
+    &__counts {
+        color: $text-primary;
+        font-weight: 600;
+        font-size: 0.78rem;
+    }
+}
+
+// ── Tips ─────────────────────────────────────────────────────────────────────
+.qb-tips {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    &__label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+        color: $text-muted;
+        margin: 0;
+    }
+
+    &__item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.45rem;
+        font-size: 0.77rem;
+        color: color.adjust($text-muted, $lightness: 8%);
+        line-height: 1.55;
+
+        span:first-child {
+            flex-shrink: 0;
+            margin-top: 1px;
+            font-size: 0.75rem;
+        }
+    }
+}
