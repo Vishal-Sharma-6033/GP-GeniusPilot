@@ -1,7 +1,7 @@
 const { PDFParse } = require("pdf-parse")
-const { generateInterviewReport, generateResumePdf } = require("../services/ai.service")
-const interviewReportModel = require("../models/interviewReport.model")
-const userModel = require("../models/user.model")
+const { generateInterviewReport, generateResumePdf } = require("./ai.service")
+const interviewReportModel = require("./interviewReport.model")
+const userModel = require("../auth/user.model")
 
 
 

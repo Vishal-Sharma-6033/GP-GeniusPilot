@@ -364,7 +364,7 @@ const InterviewQuestions = () => {
                         <div className="qb-sidebar-divider" />
 
                         {/* Tips */}
-                        <div className="qb-tips">
+                        {/* <div className="qb-tips">
                             <p className="qb-tips__label">Tips</p>
                             <div className="qb-tips__item">
                                 <span>✅</span>
@@ -378,7 +378,7 @@ const InterviewQuestions = () => {
                                 <span>🔁</span>
                                 <span>Revisit Hard questions at least 3 times before your interview</span>
                             </div>
-                        </div>
+                        </div> */}
                     </aside>
 
                 </div>

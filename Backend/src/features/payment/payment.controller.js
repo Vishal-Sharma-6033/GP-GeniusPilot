@@ -1,11 +1,11 @@
-const orderModel = require("../models/order.model")
-const userModel = require("../models/user.model")
+const orderModel = require("./order.model")
+const userModel = require("../auth/user.model")
 const {
     createSubscriptionOrder,
     verifyPaymentSignature,
     getCreditsForPlan,
     getSubscriptionDurationMs
-} = require("../services/razorpay.service")
+} = require("./razorpay.service")
 
 
 async function createOrderController(req, res) {

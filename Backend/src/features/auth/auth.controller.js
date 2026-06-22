@@ -1,8 +1,8 @@
-const userModel = require("../models/user.model")
+const userModel = require("./user.model")
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
-const { getRedisClient } = require("../config/redis")
-const { getAuthCookieOptions } = require("../utils/auth.cookie")
+const { getRedisClient } = require("../../config/redis")
+const { getAuthCookieOptions } = require("./auth.cookie")
 
 
 async function registerUserController(req, res) {
@@ -70,7 +70,6 @@ async function registerUserController(req, res) {
 
 }
 
-
 async function loginUserController(req, res) {
 
     const { email, password } = req.body
@@ -117,7 +116,6 @@ async function loginUserController(req, res) {
     })
 }
 
-
 async function logoutUserController(req, res) {
     const token = req.cookies.token
 
@@ -141,7 +139,6 @@ async function logoutUserController(req, res) {
         message: "User logged out successfully"
     })
 }
-
 
 async function getMeController(req, res) {
 
@@ -168,8 +165,6 @@ async function getMeController(req, res) {
     })
 
 }
-
-
 
 module.exports = {
     registerUserController,

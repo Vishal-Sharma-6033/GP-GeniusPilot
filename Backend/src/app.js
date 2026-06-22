@@ -11,13 +11,11 @@ app.use(cors({
     credentials: true
 }))
 
-/* require all the routes here */
-const authRouter = require("./routes/auth.routes")
-const interviewRouter = require("./routes/interview.routes")
-const paymentRouter = require("./routes/payment.routes")
+const authRouter = require("./features/auth/auth.routes")
+const interviewRouter = require("./features/interview/interview.routes")
+const paymentRouter = require("./features/payment/payment.routes")
 
 
-/* using all the routes here */
 app.use("/api/auth", authRouter)
 app.use("/api/interview", interviewRouter)
 app.use("/api/payment", paymentRouter)
