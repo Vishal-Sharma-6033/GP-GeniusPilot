@@ -162,15 +162,15 @@ $difficulty-hard:   #ff4d4d;
     }
 }
 
-// ── Center Content (scrollable, fills remaining width) ───────────────────────
+// ── Center Content (sticky top, only list scrolls) ───────────────────────────
 .qb-content {
     flex: 1;
     min-width: 0;              // crucial: prevents flex blowout
     min-height: 0;
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
-    padding: 1.5rem 1.75rem;
+    overflow: hidden;          // do NOT scroll here — only .qb-list-wrap scrolls
+    padding: 1.5rem 1.75rem 0; // no bottom padding — list-wrap provides it
     box-sizing: border-box;
     background-color: $bg-card;
 }
@@ -319,12 +319,19 @@ $difficulty-hard:   #ff4d4d;
     &--hard.qb-filter-pill--active   { border-color: $difficulty-hard;   background-color: rgba($difficulty-hard, 0.1);   color: $difficulty-hard; }
 }
 
+// ── Scrollable list wrapper (only this area scrolls) ─────────────────────────
+.qb-list-wrap {
+    flex: 1;
+    min-height: 0;             // crucial: allows flex child to shrink & scroll
+    overflow-y: auto;
+    padding-bottom: 1.5rem;    // breathing room at bottom
+}
+
 // ── Question List ─────────────────────────────────────────────────────────────
 .qb-list {
     display: flex;
     flex-direction: column;
     gap: 0.65rem;
-    flex: 1;
 }
 
 .qb-empty {
@@ -332,7 +339,6 @@ $difficulty-hard:   #ff4d4d;
     padding: 3rem 1rem;
     color: $text-muted;
     font-size: 0.9rem;
-    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -588,6 +594,38 @@ $difficulty-hard:   #ff4d4d;
         text-align: center;
         margin: 0;
         align-self: center;
+    }
+}
+
+// ── Reset Progress Button ─────────────────────────────────────────────────────
+.qb-reset-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    align-self: center;
+    background: none;
+    border: 1px solid rgba($difficulty-hard, 0.3);
+    border-radius: 0.4rem;
+    color: rgba($difficulty-hard, 0.7);
+    font-family: $font-stack;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.3rem 0.65rem;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    letter-spacing: 0.02em;
+
+    svg { flex-shrink: 0; transition: transform 0.3s ease; }
+
+    &:hover {
+        background-color: rgba($difficulty-hard, 0.08);
+        border-color: rgba($difficulty-hard, 0.6);
+        color: $difficulty-hard;
+        svg { transform: rotate(-180deg); }
+    }
+
+    &:active {
+        transform: scale(0.96);
     }
 }
 
