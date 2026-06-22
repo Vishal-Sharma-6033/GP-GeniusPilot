@@ -162,12 +162,392 @@ Bonus — findIndex(), some(), every():
 
 Key rule: map/filter/reduce/find do NOT mutate the original array — they always return a new one.`,
     },
+    {
+        id: 'js-7',
+        question: 'What is prototypal inheritance in JavaScript and how does it differ from classical inheritance?',
+        difficulty: 'Hard',
+        intention: 'Tests understanding of JavaScript\'s core object model — important for senior roles and understanding how ES6 classes really work under the hood.',
+        answer: `Classical inheritance (Java, C++) uses blueprints (classes) to create objects. A class defines the structure, and instances are copies of that blueprint.
+
+Prototypal inheritance uses existing objects as prototypes. Every JavaScript object has a hidden [[Prototype]] link (accessible via Object.getPrototypeOf() or __proto__). When you access a property, JS walks the prototype chain until it finds the property or reaches null.
+
+Example:
+  const animal = { breathe() { return 'breathing'; } };
+  const dog = Object.create(animal); // dog's prototype is animal
+  dog.bark = () => 'woof';
+  dog.breathe(); // found on prototype chain → 'breathing'
+
+ES6 class syntax is syntactic sugar over prototypal inheritance:
+  class Animal { breathe() { return 'breathing'; } }
+  class Dog extends Animal { bark() { return 'woof'; } }
+  // Dog.prototype.__proto__ === Animal.prototype
+
+Key differences:
+  - Classical: copy-based, tight coupling between class and instance.
+  - Prototypal: delegation-based, objects link to other objects.
+  - JS classes don't copy methods — instances delegate to the prototype, saving memory.
+
+Interview tip: "class" in JS doesn't create a traditional class — it's prototype delegation with nicer syntax.`,
+    },
+    {
+        id: 'js-8',
+        question: 'What is the difference between == and === in JavaScript? When would you ever use ==?',
+        difficulty: 'Easy',
+        intention: 'Tests awareness of type coercion — a common source of bugs for developers coming from typed languages.',
+        answer: `=== (strict equality) — Compares value AND type. No type coercion occurs.
+  1 === '1'   // false (number vs string)
+  null === undefined  // false
+
+== (abstract/loose equality) — Compares value after type coercion following the Abstract Equality Comparison algorithm.
+  1 == '1'    // true ('1' is coerced to 1)
+  null == undefined  // true (special rule)
+  0 == false  // true (false coerced to 0)
+  '' == false // true
+
+The coercion rules are complex and unintuitive, which is why == is almost always avoided in modern code (ESLint's eqeqeq rule enforces ===).
+
+The ONE common legitimate use of ==:
+  if (value == null) { ... }
+  // This catches BOTH null AND undefined in a single check.
+  // Equivalent to: value === null || value === undefined
+
+Summary: Always use ===. The only accepted exception is the null/undefined check pattern with ==.`,
+    },
+    {
+        id: 'js-9',
+        question: 'What are async/await and how do they relate to Promises? What is the difference between sequential and parallel async execution?',
+        difficulty: 'Medium',
+        intention: 'Evaluates ability to write clean async code and understand performance implications of sequential vs parallel execution.',
+        answer: `async/await is syntactic sugar over Promises, introduced in ES2017. An async function always returns a Promise. await pauses execution inside the async function until the Promise resolves.
+
+  async function fetchUser(id) {
+    const res = await fetch(\`/api/users/\${id}\`);
+    return res.json(); // returns a Promise automatically
+  }
+
+Sequential execution (waterfall):
+  const a = await fetchA(); // waits for A to finish
+  const b = await fetchB(); // then waits for B
+  // Total time = time(A) + time(B)
+
+Parallel execution (concurrent):
+  const [a, b] = await Promise.all([fetchA(), fetchB()]);
+  // Both start simultaneously
+  // Total time = max(time(A), time(B))
+
+Error handling: Use try/catch inside async functions, just like synchronous code.
+  try {
+    const data = await fetchUser(1);
+  } catch (err) {
+    console.error('Failed:', err);
+  }
+
+Common mistake: Using await inside forEach — it doesn't wait. Use for...of or Promise.all with map instead.`,
+    },
+    {
+        id: 'js-10',
+        question: 'What is debouncing and throttling? Provide use cases for each.',
+        difficulty: 'Medium',
+        intention: 'Tests performance awareness — essential for handling rapid user input events like scroll, resize, and search without hammering APIs or causing jank.',
+        answer: `Both techniques limit how often a function executes in response to rapid events, but in different ways:
+
+Debouncing — delays execution until a pause in events.
+  The timer resets every time the event fires. The function only runs after the events stop for a specified wait period.
+
+  function debounce(fn, wait) {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn(...args), wait);
+    };
+  }
+
+  Use case: Search autocomplete — wait until the user stops typing before making an API call.
+  Use case: Window resize handler — recalculate layout only after resizing stops.
+
+Throttling — limits execution to once per time window.
+  No matter how many events fire, the function runs at most once every N milliseconds.
+
+  Use case: Scroll event handler — update UI at most every 100ms while scrolling.
+  Use case: Button click guard — prevent double-submitting a form.
+  Use case: Real-time game input — cap player movement updates to 60 FPS.
+
+Key difference:
+  Debounce = "wait until quiet" (trailing edge).
+  Throttle = "execute regularly, no more than once per interval".
+
+Libraries like Lodash provide _.debounce and _.throttle with additional options.`,
+    },
+    {
+        id: 'js-11',
+        question: 'What is the difference between deep copy and shallow copy in JavaScript? How do you create each?',
+        difficulty: 'Medium',
+        intention: 'Tests understanding of reference vs value semantics — a common source of state mutation bugs in React.',
+        answer: `Shallow Copy — copies only the top-level properties. Nested objects/arrays are still shared by reference.
+
+  const original = { a: 1, nested: { b: 2 } };
+
+  // Shallow copy methods:
+  const copy1 = { ...original };          // spread
+  const copy2 = Object.assign({}, original);
+
+  copy1.a = 99;         // ✅ doesn't affect original.a
+  copy1.nested.b = 99;  // ❌ mutates original.nested.b too!
+
+Deep Copy — recursively copies all nested objects, creating fully independent copies.
+
+  // Modern: structuredClone (built-in, available in Node 17+ and modern browsers)
+  const deepCopy = structuredClone(original);
+
+  // Legacy: JSON round-trip (works for plain data, loses functions/undefined/Date)
+  const deepCopy2 = JSON.parse(JSON.stringify(original));
+
+  // Libraries: _.cloneDeep from Lodash (handles edge cases)
+
+When to use which:
+  - Shallow: updating flat state, creating modified versions of simple objects.
+  - Deep: cloning complex nested state, avoiding mutation bugs.
+  - In React: always prefer immutable updates (spread or immer) rather than mutating state directly.`,
+    },
+    {
+        id: 'js-12',
+        question: 'What is hoisting in JavaScript? How does it affect var, let, const, and function declarations?',
+        difficulty: 'Medium',
+        intention: 'Tests understanding of how the JS engine processes code before execution — key for debugging "used before defined" bugs.',
+        answer: `Hoisting is JavaScript's behavior of moving declarations to the top of their scope during the compilation phase, before code executes.
+
+Function declarations — fully hoisted (both declaration and body):
+  greet(); // ✅ works!
+  function greet() { console.log('hello'); }
+
+var — declaration is hoisted and initialized to undefined:
+  console.log(x); // undefined (not an error)
+  var x = 5;
+  console.log(x); // 5
+
+let and const — declaration is hoisted but NOT initialized. They are in the "Temporal Dead Zone" (TDZ) from the start of the block until the declaration line:
+  console.log(y); // ❌ ReferenceError: Cannot access 'y' before initialization
+  let y = 10;
+
+Function expressions and arrow functions behave like their variable:
+  fn(); // ❌ TypeError: fn is not a function (var) or ReferenceError (let/const)
+  var fn = () => {};
+
+Practical advice:
+  - Declare variables at the top of their scope to avoid TDZ confusion.
+  - Prefer const/let over var to get predictable TDZ errors instead of silent undefined bugs.
+  - Use named function declarations for utility functions that need to be called anywhere in the file.`,
+    },
+    {
+        id: 'js-13',
+        question: 'What are JavaScript generators and iterators? Where would you use them?',
+        difficulty: 'Hard',
+        intention: 'Tests advanced JS knowledge — generators are used in Redux-Saga, async iteration, and custom lazy sequences.',
+        answer: `An iterator is an object with a next() method that returns { value, done } pairs.
+
+A generator function (function*) automatically creates an iterator. It can pause execution with the yield keyword and resume where it left off.
+
+  function* counter(start = 0) {
+    while (true) {
+      yield start++;
+    }
+  }
+  const gen = counter(1);
+  gen.next(); // { value: 1, done: false }
+  gen.next(); // { value: 2, done: false }
+
+Generators are lazy — they compute values on demand, not all at once. This makes them perfect for:
+
+1. Infinite sequences (IDs, pagination, streaming data).
+2. Custom iterables — make any object work with for...of loops.
+3. Async flow control — redux-saga uses generators to write async code that looks synchronous.
+4. Pipeline / coroutines — pause and receive values with yield.
+
+Async generators (async function*):
+  async function* streamLines(url) {
+    const response = await fetch(url);
+    for await (const line of response.body) {
+      yield line;
+    }
+  }
+
+Interview tip: Generators are rarely used directly in application code, but they demonstrate deep language knowledge and appear in many popular libraries.`,
+    },
+    {
+        id: 'js-14',
+        question: 'What is the Temporal Dead Zone (TDZ) and why does it exist?',
+        difficulty: 'Hard',
+        intention: 'Tests deep understanding of the let/const specification — separates candidates who have read the spec from those who just use the language.',
+        answer: `The Temporal Dead Zone (TDZ) is the period between the start of a block scope and the point where a let or const variable is declared and initialized. Accessing the variable during this window throws a ReferenceError.
+
+  {
+    // TDZ starts for 'x'
+    console.log(x); // ❌ ReferenceError
+    let x = 5;      // TDZ ends — x is initialized
+    console.log(x); // ✅ 5
+  }
+
+Why does TDZ exist?
+  The spec designers deliberately chose this behavior to catch programming errors. With var, accessing a variable before its declaration silently returns undefined — a frequent source of subtle bugs. The TDZ makes the error loud and immediate.
+
+TDZ also applies to:
+  - const (same rules as let)
+  - Class declarations (classes are not hoisted like function declarations)
+  - Default parameter values that reference earlier parameters
+
+  // Default param TDZ:
+  function f(a = b, b = 1) {} // ❌ b is in TDZ when a's default is evaluated
+  function f(a = 1, b = a) {} // ✅ a is already initialized
+
+Key takeaway: TDZ is a safety mechanism — it prevents you from relying on uninitialized variables, which var silently allowed.`,
+    },
+    {
+        id: 'js-15',
+        question: 'What are WeakMap and WeakSet? How do they differ from Map and Set?',
+        difficulty: 'Hard',
+        intention: 'Tests knowledge of memory management and reference handling — relevant when building caches, private data stores, or avoiding memory leaks.',
+        answer: `Map and Set hold strong references to their keys/values, preventing garbage collection even if no other reference exists.
+
+WeakMap and WeakSet hold weak references — they allow their keys (objects only) to be garbage collected if no other strong reference exists.
+
+WeakMap:
+  - Keys must be objects (not primitives).
+  - Not enumerable — no .size, no .forEach, no iteration.
+  - Entries are automatically removed when the key object is GC'd.
+
+WeakSet:
+  - Values must be objects.
+  - Same non-enumerable, auto-cleanup behavior.
+
+Practical use cases:
+  1. Private data per object instance:
+     const _private = new WeakMap();
+     class Person {
+       constructor(name) { _private.set(this, { name }); }
+       getName() { return _private.get(this).name; }
+     }
+     // When the Person instance is GC'd, the private data is too.
+
+  2. Memoization cache keyed on DOM nodes:
+     const cache = new WeakMap();
+     // When a node is removed from the DOM and GC'd, its cache entry disappears automatically.
+
+  3. Tracking "seen" objects without preventing GC:
+     const seen = new WeakSet();
+
+Key rule: Use WeakMap/WeakSet when you want auxiliary data tied to an object's lifetime. Use Map/Set when you need to enumerate or check size.`,
+    },
+    {
+        id: 'js-16',
+        question: 'Explain the concept of memoization in JavaScript. How would you implement it?',
+        difficulty: 'Medium',
+        intention: 'Tests optimization thinking and closure knowledge — important for performance-critical code and understanding React.memo / useMemo.',
+        answer: `Memoization is a caching technique where a function stores the result of expensive computations and returns the cached result when the same inputs are provided again.
+
+Basic implementation using a closure + Map:
+  function memoize(fn) {
+    const cache = new Map();
+    return function(...args) {
+      const key = JSON.stringify(args);
+      if (cache.has(key)) {
+        return cache.get(key); // cache hit
+      }
+      const result = fn.apply(this, args);
+      cache.set(key, result);
+      return result;
+    };
+  }
+
+  const expensiveSquare = memoize((n) => {
+    console.log('computing...');
+    return n * n;
+  });
+
+  expensiveSquare(5); // computing... → 25
+  expensiveSquare(5); // (cached)    → 25
+
+When to use memoization:
+  - Pure functions (same input → same output, no side effects).
+  - Expensive computations (recursive Fibonacci, complex transforms).
+  - React: useMemo() for computed values, useCallback() for functions, React.memo() for components.
+
+Caveats:
+  - JSON.stringify is not a perfect key (fails on circular refs, functions, Maps).
+  - Unlimited cache size can cause memory leaks — add LRU eviction for production use.
+  - Only appropriate for pure functions.`,
+    },
+    {
+        id: 'js-17',
+        question: 'What is the difference between call(), apply(), and bind() in JavaScript?',
+        difficulty: 'Medium',
+        intention: 'Tests mastery of function context manipulation — useful for understanding how libraries and frameworks control "this".',
+        answer: `All three explicitly set the "this" context of a function, but differ in how they pass arguments and when the function executes.
+
+call(thisArg, arg1, arg2, ...) — invokes the function immediately with a specific "this" and individual arguments.
+  function greet(greeting, punctuation) {
+    return \`\${greeting}, \${this.name}\${punctuation}\`;
+  }
+  greet.call({ name: 'Alice' }, 'Hello', '!'); // "Hello, Alice!"
+
+apply(thisArg, [argsArray]) — same as call but takes arguments as an array.
+  greet.apply({ name: 'Bob' }, ['Hi', '.']); // "Hi, Bob."
+  // Useful when arguments are already in an array:
+  Math.max.apply(null, [1, 5, 3]); // 5 (now use spread: Math.max(...arr))
+
+bind(thisArg, arg1, ...) — returns a NEW function with "this" permanently bound. Does NOT invoke immediately.
+  const greetAlice = greet.bind({ name: 'Alice' }, 'Hey');
+  greetAlice('?'); // "Hey, Alice?"
+  // The first argument is pre-filled (partial application).
+
+Memory trick:
+  call  → comma-separated args, immediate
+  apply → array args, immediate
+  bind  → returns bound function, deferred
+
+Real-world use: React class components use bind in the constructor to fix "this" in event handlers. Arrow class fields replace this pattern in modern code.`,
+    },
+    {
+        id: 'js-18',
+        question: 'What is the Proxy object in JavaScript? What are some practical use cases?',
+        difficulty: 'Hard',
+        intention: 'Tests knowledge of meta-programming — Proxy powers Vue 3\'s reactivity system and many validation/ORM libraries.',
+        answer: `A Proxy wraps an object and intercepts fundamental operations (property reads, writes, function calls, etc.) via "traps" defined in a handler object. This enables meta-programming.
+
+  const handler = {
+    get(target, key) {
+      console.log(\`Reading: \${key}\`);
+      return key in target ? target[key] : 'default';
+    },
+    set(target, key, value) {
+      if (typeof value !== 'number') throw new TypeError('Must be a number');
+      target[key] = value;
+      return true; // must return true on success
+    }
+  };
+
+  const obj = new Proxy({}, handler);
+  obj.x = 42;       // ✅
+  obj.y = 'hello';  // ❌ TypeError
+
+Practical use cases:
+  1. Reactivity systems — Vue 3's entire reactivity is built on Proxy. Reading a prop triggers dependency tracking; writing triggers re-renders.
+  2. Validation / schemas — intercept sets to enforce type rules.
+  3. Default values — return fallback for undefined keys (as above).
+  4. Logging / debugging — trace every property access in an object.
+  5. Immutable objects — trap set/deleteProperty to throw in "frozen" mode.
+  6. API mocking — intercept fetch calls in tests.
+
+Reflect API: Use Reflect.get/set/has inside traps to delegate to default behavior cleanly, avoiding infinite loops.`,
+    },
 ]
 
 /**
  * All available topic categories for the sidebar navigation.
  * Add new categories here when you have questions for them.
  */
+import { REACT_QUESTIONS } from './reactQuestions'
+import { NODE_QUESTIONS } from './nodeQuestions'
+
 export const QUESTION_CATEGORIES = [
     {
         id: 'javascript',
@@ -176,8 +556,20 @@ export const QUESTION_CATEGORIES = [
         icon: 'JS',
         color: '#f7df1e',
     },
+    {
+        id: 'react',
+        label: 'React',
+        questions: REACT_QUESTIONS,
+        icon: '⚛',
+        color: '#61dafb',
+    },
+    {
+        id: 'nodejs',
+        label: 'Node.js',
+        questions: NODE_QUESTIONS,
+        icon: 'N',
+        color: '#3fb950',
+    },
     // Future categories — uncomment and populate when ready:
-    // { id: 'react', label: 'React', questions: [], icon: '⚛', color: '#61dafb' },
-    // { id: 'nodejs', label: 'Node.js', questions: [], icon: 'N', color: '#3fb950' },
     // { id: 'dsa', label: 'DSA', questions: [], icon: '∑', color: '#a78bfa' },
 ]
