@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router'
 import Navbar from '../../auth/components/Navbar'
 import { useAuth } from '../../auth/hooks/useAuth'
 import SubscriptionModal from '../../payment/components/SubscriptionModal'
+import LoadingScreen from '../components/LoadingScreen'
 
 const Home = () => {
 
@@ -17,6 +18,7 @@ const Home = () => {
     const [ showSubscription, setShowSubscription ] = useState(false)
     const [ subscriptionSource, setSubscriptionSource ] = useState("") // "auto" or "manual"
     const resumeInputRef = useRef()
+    const [ isGenerating, setIsGenerating ] = useState(false)
 
     const navigate = useNavigate()
 
@@ -53,17 +55,31 @@ const Home = () => {
         }
 
         const fileToUpload = resumeFile || (resumeInputRef.current?.files?.[0] || null)
-        const data = await generateReport({ jobDescription, selfDescription, resumeFile: fileToUpload })
-        if (data) {
-            navigate(`/interview/${data._id}`)
+        setIsGenerating(true)
+        try {
+            const data = await generateReport({ jobDescription, selfDescription, resumeFile: fileToUpload })
+            if (data) {
+                navigate(`/interview/${data._id}`)
+            }
+        } finally {
+            setIsGenerating(false)
         }
     }
 
     if (loading) {
+        if (isGenerating) {
+            return (
+                <LoadingScreen 
+                    type="percentage" 
+                    message="Analyzing profile & generating interview plan..." 
+                />
+            )
+        }
         return (
-            <main className='loading-screen'>
-                <h1>Loading your interview plan...</h1>
-            </main>
+            <LoadingScreen 
+                type="spinner" 
+                message="Loading your dashboard..." 
+            />
         )
     }
 

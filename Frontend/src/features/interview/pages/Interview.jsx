@@ -3,6 +3,7 @@ import '../style/interview.scss'
 import { useInterview } from '../hooks/useInterview.js'
 import { useNavigate, useParams } from 'react-router'
 import Navbar from '../../auth/components/Navbar'
+import LoadingScreen from '../components/LoadingScreen'
 
 
 
@@ -118,9 +119,10 @@ const Interview = () => {
 
     if (loading || !report) {
         return (
-            <main className='loading-screen'>
-                <h1>Loading your interview plan...</h1>
-            </main>
+            <LoadingScreen 
+                type="spinner" 
+                message={!report ? "Loading your interview plan..." : "Generating resume PDF..."} 
+            />
         )
     }
 

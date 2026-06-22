@@ -1,0 +1,149 @@
+.loading-screen-container {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #0b0e14;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+    padding: 24px;
+    z-index: 9999;
+}
+
+.loading-content-box {
+    max-width: 480px;
+    width: 100%;
+    background: rgba(22, 27, 34, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(240, 246, 252, 0.1);
+    border-radius: 20px;
+    padding: 40px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.5s ease-out;
+}
+
+.progress-indicator-wrapper {
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ── Circular Progress SVG Styles ── */
+.circular-progress-svg-wrapper {
+    position: relative;
+    width: 96px;
+    height: 96px;
+}
+
+.circular-progress-svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.circular-progress-bg {
+    fill: none;
+    stroke: rgba(240, 246, 252, 0.08);
+}
+
+.circular-progress-fg {
+    fill: none;
+    stroke: #d20d3b;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.3s ease;
+    filter: drop-shadow(0 0 4px rgba(210, 13, 59, 0.4));
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: whitesmoke;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Spinner Loader ── */
+.spinner-loader {
+    width: 54px;
+    height: 54px;
+    border: 4px solid rgba(240, 246, 252, 0.1);
+    border-top: 4px solid #d20d3b;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    filter: drop-shadow(0 0 2px rgba(210, 13, 59, 0.3));
+}
+
+/* ── Loading Message ── */
+.loading-message {
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: whitesmoke;
+    margin-bottom: 24px;
+    line-height: 1.4;
+}
+
+/* ── Loading Tips Carousel ── */
+.loading-tips-carousel {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(240, 246, 252, 0.05);
+    border-radius: 12px;
+    padding: 18px;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.tips-carousel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.tips-icon {
+    font-size: 1.1rem;
+}
+
+.tips-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.tips-content {
+    font-size: 0.95rem;
+    color: #c9d1d9;
+    line-height: 1.5;
+    animation: fadeInTip 0.4s ease-out;
+}
+
+/* ── Animations ── */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInTip {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
