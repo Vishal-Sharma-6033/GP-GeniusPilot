@@ -159,6 +159,15 @@ const InterviewQuestions = () => {
         })
     }
 
+    // ── Reset all progress for the current category ────────────────────────
+    const handleResetProgress = () => {
+        if (!window.confirm(`Reset all progress for ${currentCategory?.label ?? 'this topic'}? This cannot be undone.`)) return
+        setReviewed(new Set())
+        if (storageKey) {
+            try { localStorage.removeItem(storageKey) } catch { /* ignore */ }
+        }
+    }
+
     // ── Current category data ──────────────────────────────────────────────
     const currentCategory = QUESTION_CATEGORIES.find(c => c.id === activeCategory)
     const allQuestions = currentCategory?.questions ?? []
@@ -216,17 +225,15 @@ const InterviewQuestions = () => {
                         ))}
 
                         {/* Coming soon placeholders */}
-                        {[
-                            { id: 'react',  label: 'React',   icon: '⚛' },
-                            { id: 'nodejs', label: 'Node.js', icon: 'N' },
-                            { id: 'dsa',    label: 'DSA',     icon: '∑' },
+                        {/* {[
+                            { id: 'dsa', label: 'DSA', icon: '∑' },
                         ].map(cat => (
                             <div key={cat.id} className="qb-nav__coming-soon" title="Coming soon">
                                 <span className="qb-nav__icon">{cat.icon}</span>
                                 {cat.label}
                                 <span className="qb-nav__badge">Soon</span>
                             </div>
-                        ))}
+                        ))} */}
                     </nav>
 
                     <div className="qb-divider" />
@@ -282,25 +289,27 @@ const InterviewQuestions = () => {
                             </div>
                         </div>
 
-                        {/* Question cards */}
-                        {filteredQuestions.length === 0 ? (
-                            <div className="qb-empty">
-                                <span>🔍</span>
-                                No questions match your search or filter.
-                            </div>
-                        ) : (
-                            <div className="qb-list">
-                                {filteredQuestions.map((q, i) => (
-                                    <QuestionCard
-                                        key={q.id}
-                                        item={q}
-                                        globalIndex={i}
-                                        reviewed={reviewed.has(q.id)}
-                                        onToggle={handleToggle}
-                                    />
-                                ))}
-                            </div>
-                        )}
+                        {/* Question cards — only this wrapper scrolls */}
+                        <div className="qb-list-wrap">
+                            {filteredQuestions.length === 0 ? (
+                                <div className="qb-empty">
+                                    <span>🔍</span>
+                                    No questions match your search or filter.
+                                </div>
+                            ) : (
+                                <div className="qb-list">
+                                    {filteredQuestions.map((q, i) => (
+                                        <QuestionCard
+                                            key={q.id}
+                                            item={q}
+                                            globalIndex={i}
+                                            reviewed={reviewed.has(q.id)}
+                                            onToggle={handleToggle}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </main>
 
                     <div className="qb-divider" />
@@ -318,6 +327,20 @@ const InterviewQuestions = () => {
                                         ? `${pct}% complete — keep going!`
                                         : `${pct}% complete`}
                             </p>
+                            {totalReviewed > 0 && (
+                                <button
+                                    id="qb-reset-btn"
+                                    className="qb-reset-btn"
+                                    onClick={handleResetProgress}
+                                    title="Reset progress for this topic"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="1 4 1 10 7 10" />
+                                        <path d="M3.51 15a9 9 0 1 0 .49-3.29" />
+                                    </svg>
+                                    Reset Progress
+                                </button>
+                            )}
                         </div>
 
                         <div className="qb-sidebar-divider" />
