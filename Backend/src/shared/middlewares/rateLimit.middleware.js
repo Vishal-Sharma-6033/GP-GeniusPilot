@@ -1,4 +1,4 @@
-const { getRedisClient } = require("../../config/redis")
+import { getRedisClient } from "../../config/redis.js"
 
 
 function createRateLimiter({ keyPrefix = "rl", windowSeconds = 60, max = 5, message } = {}) {
@@ -31,4 +31,4 @@ function createRateLimiter({ keyPrefix = "rl", windowSeconds = 60, max = 5, mess
     }
 }
 
-module.exports = { createRateLimiter }
+export { createRateLimiter }

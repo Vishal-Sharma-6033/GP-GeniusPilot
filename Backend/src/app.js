@@ -1,6 +1,6 @@
-const express = require("express")
-const cookieParser = require("cookie-parser")
-const cors = require("cors")
+import express from "express"
+import cookieParser from "cookie-parser"
+import cors from "cors"
 
 const app = express()
 
@@ -11,9 +11,9 @@ app.use(cors({
     credentials: true
 }))
 
-const authRouter = require("./features/auth/auth.routes")
-const interviewRouter = require("./features/interview/interview.routes")
-const paymentRouter = require("./features/payment/payment.routes")
+import authRouter from "./features/auth/auth.routes.js"
+import interviewRouter from "./features/interview/interview.routes.js"
+import paymentRouter from "./features/payment/payment.routes.js"
 
 
 app.use("/api/auth", authRouter)
@@ -22,4 +22,4 @@ app.use("/api/payment", paymentRouter)
 
 
 
-module.exports = app
+export default app

@@ -1,8 +1,8 @@
-const userModel = require("./user.model")
-const bcrypt = require("bcryptjs")
-const jwt = require("jsonwebtoken")
-const { getRedisClient } = require("../../config/redis")
-const { getAuthCookieOptions } = require("./auth.cookie")
+import userModel from "./user.model.js"
+import bcrypt from "bcryptjs"
+import jwt from "jsonwebtoken"
+import { getRedisClient } from "../../config/redis.js"
+import { getAuthCookieOptions } from "./auth.cookie.js"
 
 
 async function registerUserController(req, res) {
@@ -165,7 +165,7 @@ async function getMeController(req, res) {
 
 }
 
-module.exports = {
+export {
     registerUserController,
     loginUserController,
     logoutUserController,

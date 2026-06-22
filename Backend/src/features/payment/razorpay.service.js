@@ -1,5 +1,5 @@
-const Razorpay = require("razorpay")
-const crypto = require("crypto")
+import Razorpay from "razorpay"
+import crypto from "crypto"
 
 let instance = null
 
@@ -65,7 +65,7 @@ function getSubscriptionDurationMs(plan) {
     return plan === "monthly" ? 30 * 24 * 60 * 60 * 1000 : 365 * 24 * 60 * 60 * 1000
 }
 
-module.exports = {
+export {
     createSubscriptionOrder,
     verifyPaymentSignature,
     getCreditsForPlan,

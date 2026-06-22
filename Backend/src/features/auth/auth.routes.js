@@ -1,6 +1,6 @@
-const { Router } = require('express')
-const authController = require("./auth.controller")
-const authMiddleware = require("./auth.middleware")
+import { Router } from "express"
+import * as authController from "./auth.controller.js"
+import * as authMiddleware from "./auth.middleware.js"
 
 const authRouter = Router()
 
@@ -14,4 +14,4 @@ authRouter.get("/get-me", authMiddleware.authUser, authController.getMeControlle
 
 authRouter.get("/me", authMiddleware.authUser, authController.getMeController)
 
-module.exports = authRouter
+export default authRouter

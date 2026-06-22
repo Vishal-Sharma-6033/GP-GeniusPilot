@@ -1,7 +1,7 @@
-const jwt = require("jsonwebtoken")
-const { getRedisClient } = require("../../config/redis")
+import jwt from "jsonwebtoken"
+import { getRedisClient } from "../../config/redis.js"
 
-async function authUser(req, res, next) {
+export async function authUser(req, res, next) {
 
     const token = req.cookies.token
 
@@ -45,6 +45,3 @@ async function authUser(req, res, next) {
     }
 
 }
-
-
-module.exports = { authUser }

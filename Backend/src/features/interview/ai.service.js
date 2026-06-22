@@ -1,7 +1,7 @@
-const OpenAI = require("openai")
-const { z } = require("zod")
-const { zodToJsonSchema } = require("zod-to-json-schema")
-const puppeteer = require("puppeteer")
+import OpenAI from "openai"
+import { z } from "zod"
+import { zodToJsonSchema } from "zod-to-json-schema"
+import puppeteer from "puppeteer"
 
 let client = null
 
@@ -205,4 +205,4 @@ async function generateResumePdf({ resume, selfDescription, jobDescription }) {
     return pdfBuffer
 }
 
-module.exports = { generateInterviewReport, generateResumePdf }
+export { generateInterviewReport, generateResumePdf }

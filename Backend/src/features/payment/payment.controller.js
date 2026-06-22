@@ -1,11 +1,11 @@
-const orderModel = require("./order.model")
-const userModel = require("../auth/user.model")
-const {
+import orderModel from "./order.model.js"
+import userModel from "../auth/user.model.js"
+import {
     createSubscriptionOrder,
     verifyPaymentSignature,
     getCreditsForPlan,
     getSubscriptionDurationMs
-} = require("./razorpay.service")
+} from "./razorpay.service.js"
 
 
 async function createOrderController(req, res) {
@@ -48,7 +48,6 @@ async function createOrderController(req, res) {
         })
     }
 }
-
 
 async function verifyPaymentController(req, res) {
     try {
@@ -134,7 +133,6 @@ async function verifyPaymentController(req, res) {
     }
 }
 
-
 async function getSubscriptionStatusController(req, res) {
     try {
         const user = await userModel.findById(req.user.id)
@@ -158,7 +156,7 @@ async function getSubscriptionStatusController(req, res) {
     }
 }
 
-module.exports = {
+export {
     createOrderController,
     verifyPaymentController,
     getSubscriptionStatusController

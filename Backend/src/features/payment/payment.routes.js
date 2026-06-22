@@ -1,6 +1,6 @@
-const { Router } = require("express")
-const authMiddleware = require("../auth/auth.middleware")
-const paymentController = require("./payment.controller")
+import { Router } from "express"
+import * as authMiddleware from "../auth/auth.middleware.js"
+import * as paymentController from "./payment.controller.js"
 
 const paymentRouter = Router()
 
@@ -13,4 +13,4 @@ paymentRouter.post("/verify", authMiddleware.authUser, paymentController.verifyP
 
 paymentRouter.get("/subscription", authMiddleware.authUser, paymentController.getSubscriptionStatusController)
 
-module.exports = paymentRouter
+export default paymentRouter

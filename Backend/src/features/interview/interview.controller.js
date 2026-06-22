@@ -1,7 +1,7 @@
-const { PDFParse } = require("pdf-parse")
-const { generateInterviewReport, generateResumePdf } = require("./ai.service")
-const interviewReportModel = require("./interviewReport.model")
-const userModel = require("../auth/user.model")
+import { PDFParse } from "pdf-parse"
+import { generateInterviewReport, generateResumePdf } from "./ai.service.js"
+import interviewReportModel from "./interviewReport.model.js"
+import userModel from "../auth/user.model.js"
 
 
 
@@ -225,7 +225,7 @@ async function updateProgressController(req, res) {
     }
 }
 
-module.exports = {
+export {
     generateInterViewReportController,
     getInterviewReportByIdController,
     getAllInterviewReportsController,

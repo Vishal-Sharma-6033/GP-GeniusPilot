@@ -1,4 +1,4 @@
-function getAuthCookieOptions() {
+export function getAuthCookieOptions() {
     const isProduction = process.env.NODE_ENV === "production"
 
     return {
@@ -7,5 +7,3 @@ function getAuthCookieOptions() {
         secure: isProduction,
     }
 }
-
-module.exports = { getAuthCookieOptions }

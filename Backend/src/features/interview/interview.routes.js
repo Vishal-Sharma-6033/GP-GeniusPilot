@@ -1,8 +1,8 @@
-const express = require("express")
-const authMiddleware = require("../auth/auth.middleware")
-const interviewController = require("./interview.controller")
-const upload = require("./file.middleware")
-const { createRateLimiter } = require("../../shared/middlewares/rateLimit.middleware")
+import express from "express"
+import * as authMiddleware from "../auth/auth.middleware.js"
+import * as interviewController from "./interview.controller.js"
+import upload from "./file.middleware.js"
+import { createRateLimiter } from "../../shared/middlewares/rateLimit.middleware.js"
 
 const interviewRouter = express.Router()
 
@@ -43,4 +43,4 @@ interviewRouter.post("/resume/pdf/:interviewReportId", authMiddleware.authUser, 
 
 interviewRouter.delete("/:interviewId", authMiddleware.authUser, interviewController.deleteInterviewReportController)
 
-module.exports = interviewRouter
+export default interviewRouter
