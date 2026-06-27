@@ -1,6 +1,7 @@
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../auth.context";
-import { login, register, logout, getMe } from "../services/auth.api";
+import { login, register, logout, getMe, clerkSync } from "../services/auth.api";
+import { useUser } from "@clerk/react-router";
 
 
 
@@ -61,24 +62,39 @@ export const useAuth = () => {
         }
     }
 
+    const { isLoaded, isSignedIn, user: clerkUser } = useUser()
+
     useEffect(() => {
+        if (!isLoaded) return
 
-        const getAndSetUser = async () => {
-            try {
-
-                const data = await getMe()
-                setUser(data.user)
-                setCredits(data.user.credits)
-                setSubscriptionPlan(data.user.subscriptionPlan || "free")
-                setSubscriptionExpiry(data.user.subscriptionExpiry || null)
-            } catch (err) { } finally {
+        const syncClerkUser = async () => {
+            if (isSignedIn && clerkUser) {
+                const email = clerkUser.primaryEmailAddress?.emailAddress
+                const username = clerkUser.username || clerkUser.firstName || email.split('@')[0]
+                
+                try {
+                    const data = await clerkSync({ email, username })
+                    setUser(data.user)
+                    setCredits(data.user.credits)
+                    setSubscriptionPlan(data.user.subscriptionPlan || "free")
+                    setSubscriptionExpiry(data.user.subscriptionExpiry || null)
+                } catch (err) {
+                    console.error("Clerk sync error:", err)
+                } finally {
+                    setLoading(false)
+                }
+            } else {
+                setUser(null)
+                setCredits(0)
+                setSubscriptionPlan("free")
+                setSubscriptionExpiry(null)
                 setLoading(false)
             }
         }
 
-        getAndSetUser()
+        syncClerkUser()
 
-    }, [])
+    }, [isLoaded, isSignedIn, clerkUser])
 
     return { 
         user, loading, credits, 

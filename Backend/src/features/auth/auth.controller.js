@@ -165,9 +165,58 @@ async function getMeController(req, res) {
 
 }
 
+async function clerkSyncController(req, res) {
+    const { email, username } = req.body
+
+    if (!email || !username) {
+        return res.status(400).json({
+            message: "Please provide email and username"
+        })
+    }
+
+    try {
+        let user = await userModel.findOne({ email: String(email).trim().toLowerCase() })
+
+        if (!user) {
+            const dummyPassword = await bcrypt.hash(Math.random().toString(36), 10)
+            user = await userModel.create({
+                username: String(username).trim(),
+                email: String(email).trim().toLowerCase(),
+                password: dummyPassword
+            })
+        }
+
+        const token = jwt.sign(
+            { id: user._id, username: user.username },
+            process.env.JWT_SECRET,
+            { expiresIn: "1d" }
+        )
+
+        res.cookie("token", token, getAuthCookieOptions())
+
+        res.status(200).json({
+            message: "User synced successfully",
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email,
+                credits: user.credits,
+                subscriptionPlan: user.subscriptionPlan,
+                subscriptionExpiry: user.subscriptionExpiry
+            }
+        })
+    } catch (err) {
+        console.error("Clerk sync error:", err)
+        res.status(500).json({
+            message: "Failed to sync user with backend"
+        })
+    }
+}
+
 export {
     registerUserController,
     loginUserController,
     logoutUserController,
-    getMeController
+    getMeController,
+    clerkSyncController
 }

@@ -14,4 +14,6 @@ authRouter.get("/get-me", authMiddleware.authUser, authController.getMeControlle
 
 authRouter.get("/me", authMiddleware.authUser, authController.getMeController)
 
+authRouter.post("/clerk-sync", authController.clerkSyncController)
+
 export default authRouter

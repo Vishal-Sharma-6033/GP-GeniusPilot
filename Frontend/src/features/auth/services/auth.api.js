@@ -64,3 +64,13 @@ export async function getMe() {
     }
 
 }
+
+export async function clerkSync({ email, username }) {
+    try {
+        const response = await api.post("/api/auth/clerk-sync", { email, username })
+        return response.data
+    } catch (err) {
+        console.log(err)
+        throw err
+    }
+}
