@@ -1,0 +1,25 @@
+FROM node:20-alpine
+
+# Chromium for Puppeteer PDF generation + curl for health check
+RUN apk add --no-cache chromium curl ca-certificates
+ENV PUPPETEER_SKIP_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+# Non-root user
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -S -u 1001 -G appgroup appuser
+
+WORKDIR /app
+
+COPY Backend/package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+
+COPY Backend/ .
+
+EXPOSE 5000
+
+HEALTHCHECK --interval=30s --timeout=15s --start-period=60s --retries=3 \
+    CMD curl -s -o /dev/null http://localhost:5000/api/auth/me || exit 1
+
+USER appuser
+CMD ["node", "server.js"]
