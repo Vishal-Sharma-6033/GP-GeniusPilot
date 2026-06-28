@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import Navbar from '../../auth/components/Navbar'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { QUESTION_CATEGORIES } from '../data/jsQuestions'
+import { filterQuestions } from '../utils/questionUtils'
 import '../style/questions.scss'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -174,14 +175,8 @@ const InterviewQuestions = () => {
 
     // ── Filtered questions ─────────────────────────────────────────────────
     const filteredQuestions = useMemo(() => {
-        return allQuestions.filter(q => {
-            const matchesDiff = diffFilter === 'All' || q.difficulty === diffFilter
-            const matchesSearch = searchQuery.trim() === ''
-                || q.question.toLowerCase().includes(searchQuery.toLowerCase())
-                || q.answer.toLowerCase().includes(searchQuery.toLowerCase())
-            return matchesDiff && matchesSearch
-        })
-    }, [allQuestions, diffFilter, searchQuery])
+        return filterQuestions(allQuestions, searchQuery, diffFilter)
+    }, [allQuestions, searchQuery, diffFilter])
 
     // ── Difficulty breakdown for sidebar ───────────────────────────────────
     const breakdown = useMemo(() => {

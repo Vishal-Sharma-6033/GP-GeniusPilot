@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "npm --prefix Backend run dev & npm --prefix Frontend run dev & wait",
     "dev:backend": "npm --prefix Backend run dev",
-    "dev:frontend": "npm --prefix Frontend run dev"
+    "dev:frontend": "npm --prefix Frontend run dev",
+    "test": "npm --prefix Backend test && npm --prefix Frontend test",
+    "test:watch": "npm --prefix Backend test:watch & npm --prefix Frontend test:watch & wait"
   }
 }

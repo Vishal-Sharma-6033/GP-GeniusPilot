@@ -24,7 +24,10 @@ function createRateLimiter({ keyPrefix = "rl", windowSeconds = 60, max = 5, mess
                 })
             }
         } catch (err) {
-            console.error("Rate limiter error:", err.message)
+            console.error("Rate limiter error (failing closed):", err.message)
+            return res.status(503).json({
+                message: "Service temporarily unavailable. Please try again later."
+            })
         }
 
         next()

@@ -100,6 +100,7 @@ export const useAuth = () => {
         user, loading, credits, 
         subscriptionPlan, subscriptionExpiry,
         handleRegister, handleLogin, handleLogout, 
-        updateCredits, updateSubscription 
+        updateCredits, updateSubscription,
+        isClerkSignedIn: isSignedIn
     }
 }
