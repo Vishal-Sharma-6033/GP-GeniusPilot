@@ -124,11 +124,16 @@ const InterviewQuestions = () => {
 
     // Load progress from localStorage when category or user changes
     useEffect(() => {
-        if (!storageKey) return
+        if (!storageKey) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setReviewed(new Set())
+            return
+        }
         try {
             const saved = localStorage.getItem(storageKey)
             if (saved) {
-                setReviewed(new Set(JSON.parse(saved)))
+                const parsed = JSON.parse(saved)
+                setReviewed(new Set(parsed))
             } else {
                 setReviewed(new Set())
             }
@@ -171,7 +176,7 @@ const InterviewQuestions = () => {
 
     // ── Current category data ──────────────────────────────────────────────
     const currentCategory = QUESTION_CATEGORIES.find(c => c.id === activeCategory)
-    const allQuestions = currentCategory?.questions ?? []
+    const allQuestions = useMemo(() => currentCategory?.questions ?? [], [currentCategory])
 
     // ── Filtered questions ─────────────────────────────────────────────────
     const filteredQuestions = useMemo(() => {

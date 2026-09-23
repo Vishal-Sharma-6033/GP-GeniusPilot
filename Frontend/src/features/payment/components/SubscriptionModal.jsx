@@ -63,6 +63,7 @@ const SubscriptionModal = ({ isOpen, onClose, onCreditsAdded }) => {
 
                         onClose()
                     } catch (verifyErr) {
+                        console.error("Payment verification failed:", verifyErr)
                         setError("Payment verification failed. Please contact support.")
                     } finally {
                         setLoading(false)

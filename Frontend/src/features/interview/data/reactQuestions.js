@@ -672,7 +672,7 @@ When to use:
 2. React Hook Form (RHF) — library using uncontrolled inputs + refs:
   const { register, handleSubmit, formState: { errors } } = useForm();
 
-  <input {...register('email', { required: true, pattern: /^\S+@\S+$/i })} />
+  <input {...register('email', { required: true, pattern: /^\\S+@\\S+$/i })} />
   {errors.email && <span>Email is required</span>}
 
   <form onSubmit={handleSubmit(onSubmit)} />
