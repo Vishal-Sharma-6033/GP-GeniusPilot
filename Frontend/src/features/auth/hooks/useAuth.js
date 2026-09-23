@@ -1,6 +1,6 @@
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../auth.context";
-import { login, register, logout, getMe, clerkSync } from "../services/auth.api";
+import { login, register, logout, clerkSync } from "../services/auth.api";
 import { useUser } from "@clerk/react-router";
 
 
@@ -26,7 +26,8 @@ export const useAuth = () => {
             setSubscriptionPlan(data.user.subscriptionPlan || "free")
             setSubscriptionExpiry(data.user.subscriptionExpiry || null)
         } catch (err) {
-
+            console.error("Login failed:", err)
+            throw err
         } finally {
             setLoading(false)
         }
@@ -41,7 +42,8 @@ export const useAuth = () => {
             setSubscriptionPlan(data.user.subscriptionPlan || "free")
             setSubscriptionExpiry(data.user.subscriptionExpiry || null)
         } catch (err) {
-
+            console.error("Registration failed:", err)
+            throw err
         } finally {
             setLoading(false)
         }
@@ -50,13 +52,14 @@ export const useAuth = () => {
     const handleLogout = async () => {
         setLoading(true)
         try {
-            const data = await logout()
+            await logout()
             setUser(null)
             setCredits(0)
             setSubscriptionPlan("free")
             setSubscriptionExpiry(null)
         } catch (err) {
-
+            console.error("Logout failed:", err)
+            throw err
         } finally {
             setLoading(false)
         }
@@ -94,6 +97,7 @@ export const useAuth = () => {
 
         syncClerkUser()
 
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoaded, isSignedIn, clerkUser])
 
     return { 
