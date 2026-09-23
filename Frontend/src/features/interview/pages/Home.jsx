@@ -16,7 +16,6 @@ const Home = () => {
     const [ resumeFile, setResumeFile ] = useState(null)
     const [ creditError, setCreditError ] = useState("")
     const [ showSubscription, setShowSubscription ] = useState(false)
-    const [ subscriptionSource, setSubscriptionSource ] = useState("") // "auto" or "manual"
     const resumeInputRef = useRef()
     const [ isGenerating, setIsGenerating ] = useState(false)
 
@@ -25,7 +24,6 @@ const Home = () => {
     // Auto-show subscription modal when credits <= 2 and user is on free plan
     useEffect(() => {
         if (credits <= 2 && credits > 0 && (!subscriptionPlan || subscriptionPlan === "free")) {
-            setSubscriptionSource("auto")
             setShowSubscription(true)
         }
     }, [ credits, subscriptionPlan ])
@@ -36,7 +34,6 @@ const Home = () => {
 
     const handleCloseSubscription = () => {
         setShowSubscription(false)
-        setSubscriptionSource("")
     }
 
     const handleFileChange = (e) => {

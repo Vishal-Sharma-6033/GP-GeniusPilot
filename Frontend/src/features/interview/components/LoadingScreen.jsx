@@ -18,7 +18,6 @@ export default function LoadingScreen({ type = "spinner", message = "Loading..."
     useEffect(() => {
         if (type !== 'percentage') return;
 
-        setProgress(0);
         const timer = setInterval(() => {
             setProgress((prev) => {
                 if (prev >= 99) return 99; // Cap at 99% until loading state completes
